@@ -141,6 +141,23 @@ case 0xC3: // JP nn
     print_debug("JP %x\n", op_aux);
     break;
 
+
+case 0xCB: // CB op codes
+    n = read_byte(z80->mmu, z80->pc++);
+    switch (n & 0xFF) {
+
+        case 0xBF: // RES 7,a
+            RES(7, z80->a);
+            print_debug("RES 7, a ($%x)\n", z80->a);
+            break;
+
+        default:
+            print_debug("Undefined CB OP_CODE: %x\n", op_code);
+            return 1;
+    }
+    break;
+
+
 case 0xCD: // CALL nn
     op_aux = read_word(z80->mmu, z80->pc);
     z80->pc += 2;
