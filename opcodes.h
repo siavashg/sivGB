@@ -186,8 +186,9 @@ case 0xD0: // RET NC
 
 // Put A into memory address $FF00+n.
 case 0xE0: // LDH (a8), A
-    write_byte(z80->mmu, 0xFF00+read_byte(z80->mmu, z80->pc++), z80->a);
-    print_debug("LDH $%x,A\n", z80->a);
+    op_aux = 0xFF00 + read_byte(z80->mmu, z80->pc++);
+    write_byte(z80->mmu, op_aux, z80->a);
+    print_debug("LDH $%x, A ($%x)\n", op_aux, z80->a);
     z80->t = 12;
     break;
 
