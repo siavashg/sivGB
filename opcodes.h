@@ -20,11 +20,12 @@ case 0x06: // LD B,n
     break;
 
 case 0x07: // RLCA
-    z80->f = (z80->a & 0x80) >> 3;
+    z80->f = (z80->a & Z_FLAG) >> 3;
     // Rotate a
+    n = z80->a;
     z80->a = (z80->a << 1) | (z80->a >> 7);
     z80->t = 4;
-    print_debug("RLCA\n");
+    print_debug("RLCA ($%x -> $%x)\n", n, z80->a);
     break;
 
 case 0x0E: // LD C,n
