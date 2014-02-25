@@ -41,7 +41,7 @@ int execute(Z80 *z80) {
         uint16_t op_aux;
         int8_t n;   // Signed temp byte
 
-        print_debug("PC: %x\t", address);
+        print_debug("PC: %x,\t OP: %x\t", address, op_code);
         switch(op_code) {
             #include "opcodes.h"
             default:

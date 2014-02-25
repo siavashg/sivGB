@@ -76,7 +76,7 @@ int reset_mmu(MMU *mmu) {
 }
 
 int unload_rom(MMU *mmu) {
-    print_debug("Unloading rom");
+    print_debug("Unloading rom\n");
 
     if (mmu->rom)
         free(mmu->rom);
@@ -125,7 +125,7 @@ uint8_t read_byte(MMU *mmu, uint16_t address) {
         }
 
     default:
-        print_debug("Out of bounds...\n");
+        print_debug("Memory: $%x. Out of bounds...\n", address);
         return 0;
         break;
     }
@@ -145,7 +145,7 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
     case 0x5000:
     case 0x6000:
     case 0x7000:
-        print_debug("Cartridge ROM bank not implemented");
+        print_debug("Cartridge ROM bank not implemented\n");
         break;
 
     // VRAM
@@ -158,14 +158,14 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
     // ERAM
     case 0xA000:
     case 0xB000:
-        print_debug("ERAM not implemented");
+        print_debug("ERAM not implemented\n");
         break;
 
     // WRAM
     case 0xC000:
     case 0xD000:
     case 0xE000: // ECHO
-        print_debug("ERAM not implemented");
+        print_debug("ERAM not implemented\n");
         break;
 
     // ECHO and REST
@@ -177,11 +177,12 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
         case 0x400: case 0x500: case 0x600: case 0x700:
         case 0x800: case 0x900: case 0xA00: case 0xB00:
         case 0xC00: case 0xD00:
-            print_debug("ERAM not implemented");
+            print_debug("ERAM not implemented\n");
             break;
 
         // OAM
         case 0xE00:
+            print_debug("OAM not implemented\n");
             break;
 
         case 0xF00:
@@ -196,7 +197,7 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
         }
 
     default:
-        print_debug("Unknown memory?");
+        print_debug("Unknown memory, $%x\n", address);
         break;
     }
 
