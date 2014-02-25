@@ -55,7 +55,6 @@ case 0x18: // JR n
     print_debug("JR $%x\n", n);
     break;
 
-
 case 0x20: // JR NZ, n
     // Jump to n if Z flag is reset
     n = read_byte(z80->mmu, z80->pc++);
@@ -89,7 +88,6 @@ case 0x3E: // LD A,n
     print_debug("LD A, $%x\n", z80->a);
     break;
 
-
 /*
 case 0x32: // LD (HL-),A
     print_debug("H: %x\n", z80->h);
@@ -104,13 +102,13 @@ case 0x32: // LD (HL-),A
 case 0x47: // LD B,A
     z80->b = z80->a;
     z80->t = 4;
-    print_debug("LD B,A\n");
+    print_debug("LD B, A ($%x)\n", z80->b);
     break;
 
 case 0x57: // LD D,A
     z80->d = z80->a;
     z80->t = 4;
-    print_debug("LD D,A\n");
+    print_debug("LD D, A ($%x)\n", z80->d);
     break;
 
 case 0x76: // HALT
@@ -127,20 +125,21 @@ case 0x76: // HALT
     break;
 
 case 0xAF: // XOR A
+    n = z80->a; // DEBUG
     z80->a ^= z80->a;
     z80->a &= 255;
     z80->f = z80->a ? 0 : 0x80;
     z80->t = 4;
-    print_debug("XOR A\n");
+    print_debug("XOR A ($%x -> $%x)\n", n, z80->a);
     break;
 
 case 0xC3: // JP nn
+    // No need to increment z80->pc since jump
     op_aux = read_word(z80->mmu, z80->pc);
     z80->pc = op_aux;
     z80->t = 16;
     print_debug("JP %x\n", op_aux);
     break;
-
 
 case 0xCB: // CB op codes
     n = read_byte(z80->mmu, z80->pc++);
@@ -157,7 +156,6 @@ case 0xCB: // CB op codes
     }
     break;
 
-
 case 0xCD: // CALL nn
     op_aux = read_word(z80->mmu, z80->pc);
     z80->pc += 2;
@@ -169,9 +167,8 @@ case 0xCD: // CALL nn
     // Jump to nn (op_aux)
     z80->pc = op_aux;
     z80->t = 16;
-    print_debug("CALL %x\n", op_aux);
+    print_debug("CALL $%x\n", op_aux);
     break;
-
 
 case 0xD0: // RET NC
     // Return if carry flag is reset
@@ -182,10 +179,11 @@ case 0xD0: // RET NC
     } else {
         z80->t = 8;
     }
+    print_debug("RET NC (%x)\n", !(z80->f & C_FLAG));
     break;
 
 // Put A into memory address $FF00+n.
-case 0xE0: // LDH (a8), A
+case 0xE0: // LDH (n), A
     op_aux = 0xFF00 + read_byte(z80->mmu, z80->pc++);
     write_byte(z80->mmu, op_aux, z80->a);
     print_debug("LDH $%x, A ($%x)\n", op_aux, z80->a);
@@ -193,7 +191,7 @@ case 0xE0: // LDH (a8), A
     break;
 
 // Put memory address $FF00+n into A.
-case 0xF0: // LDH A, (a8)
+case 0xF0: // LDH A, (n)
     op_aux = 0xFF00 + read_byte(z80->mmu, z80->pc++);
     z80->a = read_byte(z80->mmu, op_aux);
     print_debug("LDH A, %x ($%x)\n", z80->a, op_aux);
