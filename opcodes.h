@@ -52,7 +52,21 @@ case 0x18: // JR n
     n = read_byte(z80->mmu, z80->pc++);
     z80->pc += n;
     z80->t = 12;
-    print_debug("JR n, $%x (%i)\n", n, n);
+    print_debug("JR $%x\n", n);
+    break;
+
+
+case 0x20: // JR NZ, n
+    // Jump to n if Z flag is reset
+    n = read_byte(z80->mmu, z80->pc++);
+    if (!(z80->f & Z_FLAG)) {
+        z80->pc += n;
+        z80->t = 12;
+    } else {
+        z80->t = 8;
+    }
+    print_debug("JR NZ(%x), $%x\n", (z80->f & Z_FLAG), n);
+    return 1;
     break;
 
 case 0x21: // LD HL,nn
