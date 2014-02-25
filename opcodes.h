@@ -206,28 +206,42 @@ case 0xF3: // DI
     break;
 
 case 0xFB: // EI
+    /*
+     * This intruction enables interrupts but not immediately.
+     * Interrupts are enabled after instruction after EI is
+     * executed.
+     * TODO: Does this really enable it after next instruction?
+     */
     print_debug("EI\n");
     z80->ime = 0;
     z80->t = 4;
     break;
 
 case 0xFE: // CP, n
-    n = read_byte(z80->mmu, z80->pc++);
+    /*
+     * Compare A with n.
+     */
+    op_aux = read_byte(z80->mmu, z80->pc++);
+    n = z80->a - op_aux;
 
-    CPn: function() { 
-        var i=Z80._r.a;
-        var m=MMU.rb(Z80._r.pc);
-        i-=m;
-        Z80._r.pc++;
-        Z80._r.f=(i<0)?0x50:0x40;
-        i&=255;
-        if(!i)
-            Z80._r.f|=0x80;
-        if((Z80._r.a^i^m)&0x10)
-            Z80._r.f|=0x20; Z80._r.m=2;
-        },
+    // N Flag always set
+    z80->f = N_FLAG;
 
-    print_debug("EI\n");
-    z80->ime = 0;
+    // C Flag set for no borrow [A < n]
+    if (n < 0) {
+        z80->f |= C_FLAG;
+    }
+
+    // Z Flag set if result is zero [A = n]
+    if (n == 0) {
+        z80->f |= Z_FLAG;
+    }
+
+    // H Flag set if no borrow from bit 4.
+    // TODO: Verify this comparison
+    if ((z80->a ^ (n & 0xFF) ^ op_aux) & 0x10) {
+        z80->f |= H_FLAG;
+    }
+    print_debug("CP, $%x (A: $%x) (F: $%x)\n", op_aux, z80->a, z80->f);
     z80->t = 4;
     break;
