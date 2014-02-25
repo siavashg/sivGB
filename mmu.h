@@ -1,5 +1,5 @@
-#ifndef ROM_H
-#define ROM_H
+#ifndef MMU_H
+#define MMU_H
 
 #include <stdint.h>
 
@@ -32,4 +32,4 @@ uint16_t read_word(MMU *mmu, uint16_t address);
 uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte);
 uint16_t write_word(MMU *mmu, uint16_t address, uint16_t word);
 
-#endif // ROM_H
+#endif // MMU_H

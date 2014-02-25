@@ -109,6 +109,21 @@ uint8_t read_byte(MMU *mmu, uint16_t address) {
     case 0x3000:
         return mmu->rom[address];
         break;
+    case 0xF000:
+
+        switch(address&0x0F00) {
+        // Remaining ECHO
+        case 0xF00:
+            if ((address & 0x00FF) <= 0x7F) {
+                // FF00 - FF7F I/O ports
+                return mmu->io[address&0x00FF];
+            } else {
+                // FF80 - FFFE High RAM
+                return mmu->hram[address&0x00FF - 0xFF];
+            }
+            break;
+        }
+
     default:
         print_debug("Out of bounds...\n");
         return 0;
@@ -164,18 +179,25 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
         case 0xC00: case 0xD00:
             print_debug("ERAM not implemented");
             break;
-        }
 
         // OAM
         case 0xE00:
             break;
 
+        case 0xF00:
+            if ((address & 0x00FF) <= 0x7F) {
+                // FF00 - FF7F I/O ports
+                mmu->io[address&0x00FF] = byte;
+            } else {
+                // FF80 - FFFE High RAM
+                mmu->hram[address&0x00FF - 0xFF] = byte;
+            }
+            return 0;
+        }
+
     default:
         print_debug("Unknown memory?");
         break;
-
-    //uint8_t io[128];            // FF00 - FF7F I/O ports
-    //uint8_t hram[128];          // FF80 - FFFE High RAM
     }
 
     return 0;
