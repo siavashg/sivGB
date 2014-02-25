@@ -193,9 +193,10 @@ case 0xE0: // LDH (a8), A
     break;
 
 // Put memory address $FF00+n into A.
-case 0xF0: // LDH (a8), A
-    z80->a = 0xFF00+read_byte(z80->mmu, z80->pc++);
-    print_debug("LDH A,$%x\n", z80->a);
+case 0xF0: // LDH A, (a8)
+    op_aux = 0xFF00 + read_byte(z80->mmu, z80->pc++);
+    z80->a = read_byte(z80->mmu, op_aux);
+    print_debug("LDH A, %x ($%x)\n", z80->a, op_aux);
     z80->t = 12;
     break;
 
