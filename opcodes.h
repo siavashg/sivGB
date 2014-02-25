@@ -174,14 +174,13 @@ case 0xCD: // CALL nn
 
 
 case 0xD0: // RET NC
-    // Check carry flag
-    if (z80->f & C_FLAG) {
+    // Return if carry flag is reset
+    if (!(z80->f & C_FLAG)) {
         z80->pc = read_word(z80->mmu, z80->sp);
         z80->sp += 2;
+        z80->t = 20;
+    } else {
         z80->t = 8;
-        print_debug("RET NC\n");
-    }else {
-        z80->pc += 2;
     }
     break;
 
