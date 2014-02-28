@@ -45,22 +45,21 @@ int start(const char *filename) {
 int run(Z80 *z80, MMU *mmu, LCD *lcd) {
 
     while(z80->pc < 0x1110) {
-        int lcd_mode;
-        uint16_t address = z80->pc++;
-        uint8_t op_code = read_byte(mmu, address);
-        uint16_t op_aux;
-        int8_t n;   // Signed temp byte
+        int8_t n;
+        uint8_t op_code;
+        uint16_t w, op_aux;
 
-        print_debug("PC: %x,\t"
-                    "OP: %x\t"
-                    "LCD: %x\t",
-                    address, op_code, lcd->clock);
+        op_code = read_byte(mmu, z80->pc++);
+        print_debug("PC: 0x%.4x,\t"
+                    "OP: 0x%.2x\t"
+                    "LCD: %.3i\t",
+                    z80->pc, op_code, lcd->clock);
 
         // Z80
         switch(op_code) {
             #include "opcodes.h"
             default:
-                print_debug("Undefined OP_CODE: %x\n", op_code);
+                print_debug("Undefined OP_CODE: 0x%.2x\n", op_code);
                 return 1;
         }
         lcd->clock += z80->t;
