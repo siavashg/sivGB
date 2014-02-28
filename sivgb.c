@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "sivgb.h"
 #include "z80.h"
 #include "mmu.h"
 #include "lcd.h"
 #include "debug.h"
 
+bool debug_step = false;
 
 int main(int argc, char **argv) {
     const char *rom_filename;
@@ -116,7 +118,17 @@ int run(Z80 *z80, MMU *mmu, LCD *lcd) {
 
         #define LY 0xFF44
         write_byte(mmu, LY, lcd->line);
-    }
 
+        while(debug_step) {
+            char c = getchar();
+            if (c == '\n') {
+                break;
+            }
+            if (c == 'c') {
+                debug_step = false;
+                break;
+            }
+        }
+    }
     return 0;
 }
