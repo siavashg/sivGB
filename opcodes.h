@@ -14,7 +14,7 @@ case 0x7F: // LD A, A
     break;
 
 case 0x06: // LD B,n
-    z80->b = read_byte(z80->mmu, z80->pc++);
+    z80->b = read_byte(mmu, z80->pc++);
     z80->t = 8;
     print_debug("LD B, $%x\n", z80->b);
     break;
@@ -29,27 +29,27 @@ case 0x07: // RLCA
     break;
 
 case 0x0E: // LD C,n
-    z80->c = read_byte(z80->mmu, z80->pc++);
+    z80->c = read_byte(mmu, z80->pc++);
     z80->t = 8;
     print_debug("LD C, $%x\n", z80->c);
     break;
 
 case 0x01: // LD BC,nn
-    z80->c = read_byte(z80->mmu, z80->pc++);
-    z80->b = read_byte(z80->mmu, z80->pc++);
+    z80->c = read_byte(mmu, z80->pc++);
+    z80->b = read_byte(mmu, z80->pc++);
     z80->t = 12;
     print_debug("LD BC, $%x%x\n", z80->c, z80->b);
     break;
 
 case 0x11: // LD DE,nn
-    z80->e = read_byte(z80->mmu, z80->pc++);
-    z80->d = read_byte(z80->mmu, z80->pc++);
+    z80->e = read_byte(mmu, z80->pc++);
+    z80->d = read_byte(mmu, z80->pc++);
     z80->t = 12;
     print_debug("LD DE, $%x%x\n", z80->e, z80->d);
     break;
 
 case 0x18: // JR n
-    n = read_byte(z80->mmu, z80->pc++);
+    n = read_byte(mmu, z80->pc++);
     z80->pc += n;
     z80->t = 12;
     print_debug("JR $%x\n", n);
@@ -57,7 +57,7 @@ case 0x18: // JR n
 
 case 0x20: // JR NZ, n
     // Jump to n if Z flag is reset
-    n = read_byte(z80->mmu, z80->pc++);
+    n = read_byte(mmu, z80->pc++);
     if (!(z80->f & Z_FLAG)) {
         z80->pc += n;
         z80->t = 12;
@@ -69,21 +69,21 @@ case 0x20: // JR NZ, n
     break;
 
 case 0x21: // LD HL,nn
-    z80->l = read_byte(z80->mmu, z80->pc++);
-    z80->h = read_byte(z80->mmu, z80->pc++);
+    z80->l = read_byte(mmu, z80->pc++);
+    z80->h = read_byte(mmu, z80->pc++);
     z80->t = 12;
     print_debug("LD HL, $%x%x\n", z80->h, z80->l);
     break;
 
 case 0x31: // LD SP,nn
-    z80->sp = read_word(z80->mmu, z80->pc);
+    z80->sp = read_word(mmu, z80->pc);
     z80->pc += 2;
     z80->t = 12;
     print_debug("LD SP, $%hx\n", z80->sp);
     break;
 
 case 0x3E: // LD A,n
-    z80->a = read_byte(z80->mmu, z80->pc++);
+    z80->a = read_byte(mmu, z80->pc++);
     z80->t = 8;
     print_debug("LD A, $%x\n", z80->a);
     break;
@@ -135,14 +135,14 @@ case 0xAF: // XOR A
 
 case 0xC3: // JP nn
     // No need to increment z80->pc since jump
-    op_aux = read_word(z80->mmu, z80->pc);
+    op_aux = read_word(mmu, z80->pc);
     z80->pc = op_aux;
     z80->t = 16;
     print_debug("JP %x\n", op_aux);
     break;
 
 case 0xCB: // CB op codes
-    n = read_byte(z80->mmu, z80->pc++);
+    n = read_byte(mmu, z80->pc++);
     switch (n & 0xFF) {
 
         case 0xBF: // RES 7,a
@@ -157,12 +157,12 @@ case 0xCB: // CB op codes
     break;
 
 case 0xCD: // CALL nn
-    op_aux = read_word(z80->mmu, z80->pc);
+    op_aux = read_word(mmu, z80->pc);
     z80->pc += 2;
 
     // Push address of next instruction onto stack
     z80->sp -= 2;
-    write_word(z80->mmu, z80->sp, z80->pc);
+    write_word(mmu, z80->sp, z80->pc);
 
     // Jump to nn (op_aux)
     z80->pc = op_aux;
@@ -173,7 +173,7 @@ case 0xCD: // CALL nn
 case 0xD0: // RET NC
     // Return if carry flag is reset
     if (!(z80->f & C_FLAG)) {
-        z80->pc = read_word(z80->mmu, z80->sp);
+        z80->pc = read_word(mmu, z80->sp);
         z80->sp += 2;
         z80->t = 20;
     } else {
@@ -184,16 +184,16 @@ case 0xD0: // RET NC
 
 // Put A into memory address $FF00+n.
 case 0xE0: // LDH (n), A
-    op_aux = 0xFF00 + read_byte(z80->mmu, z80->pc++);
-    write_byte(z80->mmu, op_aux, z80->a);
+    op_aux = 0xFF00 + read_byte(mmu, z80->pc++);
+    write_byte(mmu, op_aux, z80->a);
     print_debug("LDH $%x, A ($%x)\n", op_aux, z80->a);
     z80->t = 12;
     break;
 
 // Put memory address $FF00+n into A.
 case 0xF0: // LDH A, (n)
-    op_aux = 0xFF00 + read_byte(z80->mmu, z80->pc++);
-    z80->a = read_byte(z80->mmu, op_aux);
+    op_aux = 0xFF00 + read_byte(mmu, z80->pc++);
+    z80->a = read_byte(mmu, op_aux);
     print_debug("LDH A, %x ($%x)\n", z80->a, op_aux);
     z80->t = 12;
     break;
@@ -220,7 +220,7 @@ case 0xFE: // CP, n
     /*
      * Compare A with n.
      */
-    op_aux = read_byte(z80->mmu, z80->pc++);
+    op_aux = read_byte(mmu, z80->pc++);
     n = z80->a - op_aux;
 
     // N Flag always set

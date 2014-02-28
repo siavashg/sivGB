@@ -23,9 +23,8 @@ typedef struct _MMU {
 } MMU;
 
 
-int init_mmu(MMU *mmu, const char *filename);
-int load_rom(MMU *mmu, const char *filename);
 int reset_mmu(MMU *mmu);
+int load_rom(MMU *mmu, const char *filename);
 int unload_rom(MMU *mmu);
 uint8_t read_byte(MMU *mmu, uint16_t address);
 uint16_t read_word(MMU *mmu, uint16_t address);

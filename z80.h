@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "mmu.h"
+#include "lcd.h"
 
 /* Flag values
  *
@@ -19,7 +20,6 @@
 #define C_FLAG 0x10
 
 typedef struct _Z80 {
-    MMU *mmu;
     uint16_t pc;    // Program counter
     uint16_t sp;    // Stack pointer
 
@@ -41,7 +41,6 @@ typedef struct _Z80 {
     uint8_t stop;   // STOP switch
 } Z80;
 
-int reset_z80(Z80 *z80, MMU *mmu);
-int execute(Z80 *z80);
+int reset_z80(Z80 *z80);
 
 #endif // Z80_H

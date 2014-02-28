@@ -4,37 +4,6 @@
 #include "bios.h"
 #include "debug.h"
 
-int init_mmu(MMU *mmu, const char *filename) {
-    if(load_rom(mmu, filename) != 0) {
-        return 1;
-    }
-    if(reset_mmu(mmu) != 0) {
-        return 1;
-    }
-    return 0;
-}
-
-int load_rom(MMU *mmu, const char *filename) {
-    FILE *fp;
-    unsigned int filesize;
-
-    fp = fopen(filename, "rb");
-    if (fp == NULL) {
-        printf("Cannot read ROM file...\n");
-        return 1;
-    }
-
-    fseek(fp, 0L, SEEK_END);
-    filesize = ftell(fp);  //ignore EOF
-    fseek(fp, 0L, SEEK_SET);
-
-    mmu->rom = (uint8_t*) calloc(filesize, sizeof(uint8_t));
-    fread(mmu->rom, 1, filesize, fp);
-    print_debug("Loaded %d bytes ROM into MMU\n", filesize);
-    fclose(fp);
-    return 0;
-}
-
 int reset_mmu(MMU *mmu) {
     mmu->inbios = 0; // Jumping over BIOS for now
     mmu->bios = _bios;
@@ -72,6 +41,27 @@ int reset_mmu(MMU *mmu) {
     mmu->io[0x4A] = 0x00;   // WY
     mmu->io[0x4B]= 0;       // WX
     mmu->ie=0;              // IE
+    return 0;
+}
+
+int load_rom(MMU *mmu, const char *filename) {
+    FILE *fp;
+    unsigned int filesize;
+
+    fp = fopen(filename, "rb");
+    if (fp == NULL) {
+        printf("Cannot read ROM file...\n");
+        return 1;
+    }
+
+    fseek(fp, 0L, SEEK_END);
+    filesize = ftell(fp);  //ignore EOF
+    fseek(fp, 0L, SEEK_SET);
+
+    mmu->rom = (uint8_t*) calloc(filesize, sizeof(uint8_t));
+    fread(mmu->rom, 1, filesize, fp);
+    print_debug("Loaded %d bytes ROM into MMU\n", filesize);
+    fclose(fp);
     return 0;
 }
 

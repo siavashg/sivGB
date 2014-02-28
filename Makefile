@@ -9,6 +9,7 @@ CFLAGS += -Wall -g $(OPTIMIZATION)
 OBJ = sivgb.o \
 z80.o \
 mmu.o \
+lcd.o
 
 sivgb: $(OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
