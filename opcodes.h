@@ -66,7 +66,6 @@ case 0x20: // JR NZ, n
         z80->t = 8;
     }
     print_debug("JR NZ(%x), $%x\n", (z80->f & Z_FLAG), n);
-    return 1;
     break;
 
 case 0x21: // LD HL,nn

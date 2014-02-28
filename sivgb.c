@@ -62,6 +62,61 @@ int run(Z80 *z80, MMU *mmu, LCD *lcd) {
                 return 1;
         }
         lcd->clock += z80->t;
+
+        // LCD
+        switch (lcd->mode) {
+            // H-Blank
+            case 0:
+                if (lcd->clock >= 204) {
+                    lcd->clock = 0;
+                    lcd->line++;
+
+                    if (lcd->line == 143) {
+                        lcd->mode = 1;
+                        // TODO: Render image
+                    } else {
+                        lcd->mode = 2;
+                    }
+                }
+                break;
+
+            // V-Blank
+            case 1:
+                if (lcd->clock >= 456) {
+                    lcd->clock = 0;
+                    lcd->line++;
+
+                    if (lcd->line > 153) {
+                        lcd->mode = 2;
+                        lcd->line = 0;
+                    }
+
+                }
+                break;
+
+            // OAM read
+            case 2:
+                if (lcd->clock >= 80) {
+                    lcd->clock = 0;
+                    lcd->mode = 3;
+                }
+                break;
+
+            // VRAM read, scanline
+            case 3:
+                if (lcd->clock >= 172) {
+                    lcd->clock = 0;
+                    lcd->mode = 0;
+                }
+                break;
+        }
+
+        #define STAT 0xFF41
+        write_byte(mmu, STAT, (read_byte(mmu, STAT) & 0xFF) | lcd->mode);
+
+        #define LY 0xFF44
+        write_byte(mmu, LY, lcd->line);
     }
+
     return 0;
 }
