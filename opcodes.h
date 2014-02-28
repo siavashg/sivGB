@@ -141,10 +141,18 @@ case 0xC3: // JP nn
     print_debug("JP %x\n", op_aux);
     break;
 
+case 0xC9: // RET
+    // Get address of previous instruction from stack
+    op_aux = z80->pc; // DEBUG
+    z80->pc = read_word(mmu, z80->sp);
+    z80->sp += 2;
+    z80->t = 8;
+    print_debug("RET (PC: %x -> %x)\n", z80->sp, op_aux, z80->pc);
+    break;
+
 case 0xCB: // CB op codes
     n = read_byte(mmu, z80->pc++);
     switch (n & 0xFF) {
-
         case 0xBF: // RES 7,a
             RES(7, z80->a);
             print_debug("RES 7, a ($%x)\n", z80->a);
