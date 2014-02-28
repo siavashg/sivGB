@@ -109,7 +109,7 @@ uint8_t read_byte(MMU *mmu, uint16_t address) {
                 return mmu->io[address&0x00FF];
             } else {
                 // FF80 - FFFE High RAM
-                return mmu->hram[address&0x00FF - 0xFF];
+                return mmu->hram[address&0x00FF - 0x80];
             }
             break;
         }
@@ -181,7 +181,7 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
                 mmu->io[address&0x00FF] = byte;
             } else {
                 // FF80 - FFFE High RAM
-                mmu->hram[address&0x00FF - 0xFF] = byte;
+                mmu->hram[address&0x00FF - 0x80] = byte;
             }
             return 0;
         }
