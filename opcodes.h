@@ -10,6 +10,7 @@ case 0x5B: // LD E,E
 case 0x64: // LD H,H
 case 0x6D: // LD L,L
 case 0x7F: // LD A, A
+    z80->t = 4;
     print_debug("NOP\n");
     break;
 
