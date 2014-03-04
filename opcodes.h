@@ -34,6 +34,13 @@ case 0x7F: // LD A, A
     print_debug("NOP\n");
     break;
 
+case 0x01: // LD BC,nn
+    z80->c = read_byte(mmu, z80->pc++);
+    z80->b = read_byte(mmu, z80->pc++);
+    z80->t = 12;
+    print_debug("LD BC, $%x%x\n", z80->c, z80->b);
+    break;
+
 case 0x04: // INC B
     INC(z80->b);
     print_debug("INC B (%x)\n", z80->b);
@@ -73,13 +80,6 @@ case 0x0E: // LD C,n
     z80->c = read_byte(mmu, z80->pc++);
     z80->t = 8;
     print_debug("LD C, $%x\n", z80->c);
-    break;
-
-case 0x01: // LD BC,nn
-    z80->c = read_byte(mmu, z80->pc++);
-    z80->b = read_byte(mmu, z80->pc++);
-    z80->t = 12;
-    print_debug("LD BC, $%x%x\n", z80->c, z80->b);
     break;
 
 case 0x11: // LD DE,nn
