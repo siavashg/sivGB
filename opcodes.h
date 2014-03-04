@@ -34,6 +34,16 @@ case 0x7F: // LD A, A
     print_debug("NOP\n");
     break;
 
+case 0x04: // INC B
+    INC(z80->b);
+    print_debug("INC B (%x)\n", z80->b);
+    break;
+
+case 0x05: // DEC B
+    DEC(z80->b);
+    print_debug("DEC B (%x)\n", z80->b);
+    break;
+
 case 0x06: // LD B,n
     z80->b = read_byte(mmu, z80->pc++);
     z80->t = 8;
