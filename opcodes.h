@@ -89,6 +89,18 @@ case 0x11: // LD DE,nn
     print_debug("LD DE, $%x%x\n", z80->e, z80->d);
     break;
 
+case 0x12: // LD DE,A
+    z80->e = read_byte(mmu, z80->a);
+    z80->d = read_byte(mmu, z80->a+1);
+    /* TODO: Potentially more optimized as:
+        op_aux = read_word(mmu, z80->a);
+        z80->e = op_aux & 0xFF;
+        z80->d = (op_aux >> 8) & 0xFF;
+    */
+    z80->t = 8;
+    print_debug("LD DE, A [DE: 0x%.2x%.2x]\n", z80->d, z80->e);
+    break;
+
 case 0x13: // INC DE
     w = (z80->d << 8) + z80->e; // DEBUG
     INC16(z80->d, z80->e);
