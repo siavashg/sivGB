@@ -2,6 +2,26 @@
 
 #define D16(h,l) ((h << 8) | l)
 
+#define INC(reg) \
+        reg++; \
+        reg &= 0xFF; \
+        z80->f = (z80->f & C_FLAG) | reg ? 0 : Z_FLAG; \
+        z80->t = 4;
+
+#define DEC(reg) \
+        reg--; \
+        reg &= 0xFF; \
+        z80->f = (z80->f & C_FLAG) | reg ? 0 : Z_FLAG; \
+        z80->t = 4;
+
+#define INC16(h, l) \
+    l++; \
+    l &= 0xFF; \
+    if(!l) { \
+        h++; \
+        h &= 0xFF; \
+    }
+
 case 0x00: // NOP
 case 0x40: // LD B,B
 case 0x49: // LD C,C
@@ -82,10 +102,20 @@ case 0x31: // LD SP,nn
     print_debug("LD SP, $%hx\n", z80->sp);
     break;
 
+case 0x3C: // INC A
+    INC(z80->a);
+    print_debug("INC A (%x)\n", z80->a);
+    break;
+
+case 0x3D: // DEC A
+    DEC(z80->a);
+    print_debug("DEC A (%x)\n", z80->a);
+    break;
+
 case 0x3E: // LD A,n
     z80->a = read_byte(mmu, z80->pc++);
     z80->t = 8;
-    print_debug("LD A, $%x\n", z80->a);
+    print_debug("LD A, 0x%.2x\n", z80->a);
     break;
 
 /*
