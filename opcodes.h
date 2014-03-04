@@ -59,6 +59,16 @@ case 0x07: // RLCA
     print_debug("RLCA ($%x -> $%x)\n", n, z80->a);
     break;
 
+case 0x0C: // INC C
+    INC(z80->c);
+    print_debug("INC C (%x)\n", z80->c);
+    break;
+
+case 0x0D: // DEC C
+    DEC(z80->c);
+    print_debug("DEC C (%x)\n", z80->c);
+    break;
+
 case 0x0E: // LD C,n
     z80->c = read_byte(mmu, z80->pc++);
     z80->t = 8;
