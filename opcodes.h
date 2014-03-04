@@ -89,11 +89,39 @@ case 0x11: // LD DE,nn
     print_debug("LD DE, $%x%x\n", z80->e, z80->d);
     break;
 
+case 0x13: // INC DE
+    w = (z80->d << 8) + z80->e; // DEBUG
+    INC16(z80->d, z80->e);
+    z80->t = 8;
+    print_debug("INC DE [0x%.4x -> 0x%.2x%.2x]\n",
+                w, z80->d, z80->e);
+    break;
+
+case 0x14: // INC D
+    INC(z80->d);
+    print_debug("INC D (%x)\n", z80->d);
+    break;
+
+case 0x15: // DEC D
+    DEC(z80->d);
+    print_debug("DEC D (%x)\n", z80->d);
+    break;
+
 case 0x18: // JR n
     n = read_byte(mmu, z80->pc++);
     z80->pc += n;
     z80->t = 12;
-    print_debug("JR $%x\n", n);
+    print_debug("JR 0x%.2x\n", n);
+    break;
+
+case 0x1C: // INC E
+    INC(z80->e);
+    print_debug("INC E (%x)\n", z80->e);
+    break;
+
+case 0x1D: // DEC E
+    DEC(z80->e);
+    print_debug("DEC E (%x)\n", z80->e);
     break;
 
 case 0x20: // JR NZ, n
