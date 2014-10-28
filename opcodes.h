@@ -281,7 +281,7 @@ case 0xC9: // RET
     z80->pc = read_word(mmu, z80->sp);
     z80->sp += 2;
     z80->t = 8;
-    print_debug("RET (PC: %x -> %x)\n", z80->sp, op_aux, z80->pc);
+    print_debug("RET (PC: %x -> %x)\n", z80->sp, op_aux);
     break;
 
 case 0xCB: // CB op codes
@@ -328,22 +328,58 @@ case 0xD0: // RET NC
 case 0xE0: // LDH (n), A
     op_aux = 0xFF00 + read_byte(mmu, z80->pc++);
     write_byte(mmu, op_aux, z80->a);
-    print_debug("LDH $%x, A ($%x)\n", op_aux, z80->a);
     z80->t = 12;
+    print_debug("LDH $%x, A ($%x)\n", op_aux, z80->a);
+    break;
+
+case 0xE6: // AND n
+    n = read_byte(mmu, z80->pc++);
+    z80->a &= n;
+    // TODO: What about H-FLAG?
+    z80->f = z80->a ? 0 : Z_FLAG;
+    z80->t = 8;
+    print_debug("AND 0x%.2x [A: 0x%.2x]\n", n, z80->a);
+    break;
+
+// Put A into memory address nn
+case 0xEA: // LD (nn), A
+    op_aux = read_word(mmu, z80->pc++);
+    z80->pc++;
+    write_byte(mmu, op_aux, z80->a);
+    z80->t = 16;
+    print_debug("LD (nn), A "
+                "[nn: $%.4x] "
+                "[A %.2x]\n", op_aux, z80->a);
     break;
 
 // Put memory address $FF00+n into A.
 case 0xF0: // LDH A, (n)
     op_aux = 0xFF00 + read_byte(mmu, z80->pc++);
     z80->a = read_byte(mmu, op_aux);
-    print_debug("LDH A, %x ($%x)\n", z80->a, op_aux);
+    z80->t = 12;
+    print_debug("LDH A, 0x%.4x (0x%.2x)\n", op_aux, z80->a);
+    break;
+
+case 0xF1: // POP AF
+    z80->a = read_byte(mmu, z80->sp++);
+    z80->f = read_byte(mmu, z80->sp++);
+    print_debug("POP AF\n");
     z80->t = 12;
     break;
 
 case 0xF3: // DI
-    print_debug("DI\n");
     z80->ime = 0;
     z80->t = 4;
+    print_debug("DI\n");
+    break;
+
+case 0xF5: // PUSH AF
+    z80->sp--;
+    write_byte(mmu, z80->sp, z80->a);
+    z80->sp--;
+    write_byte(mmu, z80->sp, z80->f);
+    print_debug("PUSH AF\n");
+    z80->t = 16;
     break;
 
 case 0xFB: // EI
