@@ -262,7 +262,7 @@ case 0xAF: // XOR A
     n = z80->a; // DEBUG
     z80->a ^= z80->a;
     z80->a &= 255;
-    z80->f = z80->a ? 0 : 0x80;
+    z80->f |= z80->a ? 0 : Z_FLAG;
     z80->t = 4;
     print_debug("XOR A ($%x -> $%x)\n", n, z80->a);
     break;
