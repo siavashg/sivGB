@@ -2,8 +2,6 @@
 #define Z80_H
 
 #include <stdint.h>
-#include "mmu.h"
-#include "lcd.h"
 
 /* Flag values
  *
@@ -42,5 +40,6 @@ typedef struct _Z80 {
 } Z80;
 
 int reset_z80(Z80 *z80);
+void debug_dump(Z80 *z80);
 
 #endif // Z80_H
