@@ -81,6 +81,7 @@ uint16_t read_word(MMU *mmu, uint16_t address) {
 uint8_t read_byte(MMU *mmu, uint16_t address) {
 
     switch(address&0xF000) {
+    // ROM bank 0 BIOS
     case 0x0000:
         if (mmu->inbios) {
             if (address<0x0100) {
@@ -94,15 +95,53 @@ uint8_t read_byte(MMU *mmu, uint16_t address) {
             return mmu->rom[address];
         }
         break;
+    // Cartridge ROM bank 0
     case 0x1000:
     case 0x2000:
     case 0x3000:
         return mmu->rom[address];
         break;
-    case 0xF000:
 
+    // VRAM
+    case 0x8000:
+    case 0x9000:
+        return mmu->vram[address&0x1FFF];
+        break;
+
+    // ERAM
+    case 0xA000:
+    case 0xB000:
+        print_debug("ERAM read not implemented\n");
+        exit(1);
+        break;
+
+    // WRAM
+    case 0xC000:
+    case 0xD000:
+    case 0xE000: // ECHO
+        print_debug("WRAM read not implemented\n");
+        exit(1);
+        break;
+
+    // ECHO and REST
+    case 0xF000:
         switch(address&0x0F00) {
         // Remaining ECHO
+        case 0x000: case 0x100: case 0x200: case 0x300:
+        case 0x400: case 0x500: case 0x600: case 0x700:
+        case 0x800: case 0x900: case 0xA00: case 0xB00:
+        case 0xC00: case 0xD00:
+            print_debug("ERAM read not implemented\n");
+            exit(1);
+            break;
+
+        // OAM
+        case 0xE00:
+            print_debug("OAM read not implemented\n");
+            exit(1);
+            break;
+
+        // IO and High RAM
         case 0xF00:
             if ((address & 0x00FF) <= 0x7F) {
                 // FF00 - FF7F I/O ports
@@ -127,35 +166,37 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
     switch(address&0xF000) {
 
     // Cartridge ROM banks
-    case 0x0000:
-    case 0x1000:
-    case 0x2000:
-    case 0x3000:
-    case 0x4000:
-    case 0x5000:
-    case 0x6000:
-    case 0x7000:
-        print_debug("Cartridge ROM bank not implemented\n");
+    case 0x0000: // ROM bank 0
+    case 0x1000: // ROM bank 0
+    case 0x2000: // ROM bank 0
+    case 0x3000: // ROM bank 0
+    case 0x4000: // Switchable ROM bank
+    case 0x5000: // Switchable ROM bank
+    case 0x6000: // Switchable ROM bank
+    case 0x7000: // Switchable ROM bank
+        print_debug("ROM write not implemented\n");
+        exit(1);
         break;
 
     // VRAM
     case 0x8000:
     case 0x9000:
         mmu->vram[address&0x1FFF] = byte;
-        // TODO: Update screen
         break;
 
     // ERAM
     case 0xA000:
     case 0xB000:
-        print_debug("ERAM not implemented\n");
+        print_debug("ERAM write not implemented\n");
+        exit(1);
         break;
 
     // WRAM
     case 0xC000:
     case 0xD000:
     case 0xE000: // ECHO
-        print_debug("ERAM not implemented\n");
+        print_debug("ERAM write not implemented\n");
+        exit(1);
         break;
 
     // ECHO and REST
@@ -168,11 +209,13 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
         case 0x800: case 0x900: case 0xA00: case 0xB00:
         case 0xC00: case 0xD00:
             print_debug("ERAM not implemented\n");
+            exit(1);
             break;
 
         // OAM
         case 0xE00:
             print_debug("OAM not implemented\n");
+            exit(1);
             break;
 
         case 0xF00:
