@@ -108,15 +108,15 @@ int run(Z80 *z80, MMU *mmu, LCD *lcd) {
                 if (lcd->clock >= 172) {
                     lcd->clock = 0;
                     lcd->mode = 0;
+
+                    // TODO: Write scanline to framebuffer
                 }
                 break;
         }
+        update_lcd_status(z80, mmu, lcd);
+        scanline(z80, mmu, lcd);
+        debug_dump(z80);
 
-        #define STAT 0xFF41
-        write_byte(mmu, STAT, (read_byte(mmu, STAT) & 0xFF) | lcd->mode);
-
-        #define LY 0xFF44
-        write_byte(mmu, LY, lcd->line);
 
         while(debug_step) {
             char c = getchar();
@@ -127,6 +127,7 @@ int run(Z80 *z80, MMU *mmu, LCD *lcd) {
                 debug_step = false;
                 break;
             }
+
         }
     }
     return 0;
