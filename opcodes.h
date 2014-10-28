@@ -58,6 +58,7 @@ case 0x06: // LD B,n
     break;
 
 case 0x07: // RLCA
+    // TODO: Flags: N, H, C
     z80->f = (z80->a & Z_FLAG) >> 3;
     // Rotate a
     n = z80->a;
@@ -145,14 +146,57 @@ case 0x20: // JR NZ, n
     } else {
         z80->t = 8;
     }
-    print_debug("JR NZ(%x), $%x\n", (z80->f & Z_FLAG), n);
+    print_debug("JR NZ (%x), 0x%.2x\n", !(z80->f & Z_FLAG), n);
     break;
 
 case 0x21: // LD HL,nn
     z80->l = read_byte(mmu, z80->pc++);
     z80->h = read_byte(mmu, z80->pc++);
     z80->t = 12;
-    print_debug("LD HL, $%x%x\n", z80->h, z80->l);
+    print_debug("LD HL, 0x%.2x%.2x\n", z80->h, z80->l);
+    break;
+
+case 0x22: // LDI HL, A
+    op_aux = (z80->h << 8) + z80->l;
+    write_byte(mmu, op_aux, z80->a);
+    INC16(z80->h, z80->l);
+    w = (z80->h << 8) + z80->l; // DEBUG
+    z80->t = 8;
+    print_debug("LDI HL, A"
+                "[HL: 0x%.4x -> 0x%.4x]"
+                "[A: 0x%.2x]\n", op_aux, w, z80->a);
+    break;
+
+case 0x24: // INC H
+    INC(z80->h);
+    print_debug("INC H (%x)\n", z80->h);
+    break;
+
+case 0x25: // DEC H
+    DEC(z80->h);
+    print_debug("DEC H (%x)\n", z80->h);
+    break;
+
+case 0x2A: // LDI A, HL
+    n = z80->a; // DEBUG
+    op_aux = (z80->h << 8) + z80->l;
+    z80->a = read_byte(mmu, op_aux);
+    INC16(z80->h, z80->l);
+    w = (z80->h << 8) + z80->l; // DEBUG
+    z80->t = 8;
+    print_debug("LDI A, HL"
+                "[HL: 0x%.4x -> 0x%.4x]"
+                "[A: 0x%.2x -> 0x%.2x]\n", op_aux, w, n, z80->a);
+    break;
+
+case 0x2C: // INC L
+    INC(z80->l);
+    print_debug("INC L (%x)\n", z80->l);
+    break;
+
+case 0x2D: // DEC L
+    DEC(z80->l);
+    print_debug("DEC L (%x)\n", z80->l);
     break;
 
 case 0x31: // LD SP,nn
