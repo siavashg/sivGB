@@ -304,8 +304,47 @@ case 0x70: // LD (HL), B
     write_byte(mmu, op_aux, z80->b);
     z80->t = 8;
     print_debug("LD (HL), B "
-                "[HL: 0x%.4X] "
-                "[B: 0x%.2X]\n", op_aux, z80->b);
+                "[HL: 0x%.4X, B: 0x%.2X]\n", op_aux, z80->b);
+    break;
+
+case 0x71: // LD (HL), C
+    op_aux = D16(z80->h, z80->l);
+    write_byte(mmu, op_aux, z80->c);
+    z80->t = 8;
+    print_debug("LD (HL), C "
+                "[HL: 0x%.4X, C: 0x%.2X]\n", op_aux, z80->c);
+    break;
+
+case 0x72: // LD (HL), D
+    op_aux = D16(z80->h, z80->l);
+    write_byte(mmu, op_aux, z80->d);
+    z80->t = 8;
+    print_debug("LD (HL), D "
+                "[HL: 0x%.4X, D: 0x%.2X]\n", op_aux, z80->d);
+    break;
+
+case 0x73: // LD (HL), E
+    op_aux = D16(z80->h, z80->l);
+    write_byte(mmu, op_aux, z80->e);
+    z80->t = 8;
+    print_debug("LD (HL), E "
+                "[HL: 0x%.4X, E: 0x%.2X]\n", op_aux, z80->e);
+    break;
+
+case 0x74: // LD (HL), H
+    op_aux = D16(z80->h, z80->l);
+    write_byte(mmu, op_aux, z80->h);
+    z80->t = 8;
+    print_debug("LD (HL), H "
+                "[HL: 0x%.4X, H: 0x%.2X]\n", op_aux, z80->h);
+    break;
+
+case 0x75: // LD (HL), L
+    op_aux = D16(z80->h, z80->l);
+    write_byte(mmu, op_aux, z80->l);
+    z80->t = 8;
+    print_debug("LD (HL), L "
+                "[HL: 0x%.4X, L: 0x%.2X]\n", op_aux, z80->l);
     break;
 
 case 0x76: // HALT
