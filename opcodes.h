@@ -2,16 +2,28 @@
 
 #define D16(h,l) ((h << 8) | l)
 
+/* Flags */
+#define set_Z(x) z80->f = ((z80->f & (0xFF - Z_FLAG)) | ((x)<<7))
+#define set_N(x) z80->f = ((z80->f & (0xFF - N_FLAG)) | ((x)<<6))
+#define set_H(x) z80->f = ((z80->f & (0xFF - H_FLAG)) | ((x)<<5))
+#define set_C(x) z80->f = ((z80->f & (0xFF - C_FLAG)) | ((x)<<4))
+
+// TODO: Verify H flag
 #define INC(reg) \
         reg++; \
         reg &= 0xFF; \
-        z80->f = (z80->f & C_FLAG) | reg ? 0 : Z_FLAG; \
+        set_Z(!reg); \
+        set_N(0); \
+        set_H(reg == 0x10); \
         z80->t = 4;
 
+// TODO: Verify H flag
 #define DEC(reg) \
         reg--; \
         reg &= 0xFF; \
-        z80->f = (z80->f & C_FLAG) | reg ? 0 : Z_FLAG; \
+        set_Z(!reg); \
+        set_N(1); \
+        set_H(reg == 0xF); \
         z80->t = 4;
 
 #define INC16(h, l) \
@@ -19,6 +31,14 @@
     l &= 0xFF; \
     if(!l) { \
         h++; \
+        h &= 0xFF; \
+    }
+
+#define DEC16(h, l) \
+    l--; \
+    l &= 0xFF; \
+    if(!l) { \
+        h--; \
         h &= 0xFF; \
     }
 
@@ -38,56 +58,59 @@ case 0x01: // LD BC,nn
     z80->c = read_byte(mmu, z80->pc++);
     z80->b = read_byte(mmu, z80->pc++);
     z80->t = 12;
-    print_debug("LD BC, $%x%x\n", z80->c, z80->b);
+    print_debug("LD BC, $%X%X\n", z80->c, z80->b);
     break;
 
 case 0x04: // INC B
     INC(z80->b);
-    print_debug("INC B (%x)\n", z80->b);
+    print_debug("INC B (%X)\n", z80->b);
     break;
 
 case 0x05: // DEC B
     DEC(z80->b);
-    print_debug("DEC B (%x)\n", z80->b);
+    print_debug("DEC B (%X)\n", z80->b);
     break;
 
 case 0x06: // LD B,n
     z80->b = read_byte(mmu, z80->pc++);
     z80->t = 8;
-    print_debug("LD B, $%x\n", z80->b);
+    print_debug("LD B, $%X\n", z80->b);
     break;
 
 case 0x07: // RLCA
-    // TODO: Flags: N, H, C
-    z80->f = (z80->a & Z_FLAG) >> 3;
+    // C - Contains old bit 7 data.
+    set_C(z80->a & Z_FLAG);
     // Rotate a
     n = z80->a;
     z80->a = (z80->a << 1) | (z80->a >> 7);
+    set_Z(!z80->a);
+    set_N(0);
+    set_H(0);
     z80->t = 4;
-    print_debug("RLCA ($%x -> $%x)\n", n, z80->a);
+    print_debug("RLCA ($%X -> $%X)\n", n, z80->a);
     break;
 
 case 0x0C: // INC C
     INC(z80->c);
-    print_debug("INC C (%x)\n", z80->c);
+    print_debug("INC C (%X)\n", z80->c);
     break;
 
 case 0x0D: // DEC C
     DEC(z80->c);
-    print_debug("DEC C (%x)\n", z80->c);
+    print_debug("DEC C (%X)\n", z80->c);
     break;
 
 case 0x0E: // LD C,n
     z80->c = read_byte(mmu, z80->pc++);
     z80->t = 8;
-    print_debug("LD C, $%x\n", z80->c);
+    print_debug("LD C, $%X\n", z80->c);
     break;
 
 case 0x11: // LD DE,nn
     z80->e = read_byte(mmu, z80->pc++);
     z80->d = read_byte(mmu, z80->pc++);
     z80->t = 12;
-    print_debug("LD DE, $%x%x\n", z80->e, z80->d);
+    print_debug("LD DE, $%X%X\n", z80->e, z80->d);
     break;
 
 case 0x12: // LD DE,A
@@ -112,12 +135,12 @@ case 0x13: // INC DE
 
 case 0x14: // INC D
     INC(z80->d);
-    print_debug("INC D (%x)\n", z80->d);
+    print_debug("INC D (%X)\n", z80->d);
     break;
 
 case 0x15: // DEC D
     DEC(z80->d);
-    print_debug("DEC D (%x)\n", z80->d);
+    print_debug("DEC D (%X)\n", z80->d);
     break;
 
 case 0x18: // JR n
@@ -129,12 +152,12 @@ case 0x18: // JR n
 
 case 0x1C: // INC E
     INC(z80->e);
-    print_debug("INC E (%x)\n", z80->e);
+    print_debug("INC E (%X)\n", z80->e);
     break;
 
 case 0x1D: // DEC E
     DEC(z80->e);
-    print_debug("DEC E (%x)\n", z80->e);
+    print_debug("DEC E (%X)\n", z80->e);
     break;
 
 case 0x20: // JR NZ, n
@@ -146,7 +169,7 @@ case 0x20: // JR NZ, n
     } else {
         z80->t = 8;
     }
-    print_debug("JR NZ (%x), 0x%.2x\n", !(z80->f & Z_FLAG), n);
+    print_debug("JR NZ (%X), 0x%.2x\n", !(z80->f & Z_FLAG), n);
     break;
 
 case 0x21: // LD HL,nn
@@ -169,12 +192,12 @@ case 0x22: // LDI HL, A
 
 case 0x24: // INC H
     INC(z80->h);
-    print_debug("INC H (%x)\n", z80->h);
+    print_debug("INC H (%X)\n", z80->h);
     break;
 
 case 0x25: // DEC H
     DEC(z80->h);
-    print_debug("DEC H (%x)\n", z80->h);
+    print_debug("DEC H (%X)\n", z80->h);
     break;
 
 case 0x2A: // LDI A, HL
@@ -191,12 +214,12 @@ case 0x2A: // LDI A, HL
 
 case 0x2C: // INC L
     INC(z80->l);
-    print_debug("INC L (%x)\n", z80->l);
+    print_debug("INC L (%X)\n", z80->l);
     break;
 
 case 0x2D: // DEC L
     DEC(z80->l);
-    print_debug("DEC L (%x)\n", z80->l);
+    print_debug("DEC L (%X)\n", z80->l);
     break;
 
 case 0x31: // LD SP,nn
@@ -208,12 +231,12 @@ case 0x31: // LD SP,nn
 
 case 0x3C: // INC A
     INC(z80->a);
-    print_debug("INC A (%x)\n", z80->a);
+    print_debug("INC A (%X)\n", z80->a);
     break;
 
 case 0x3D: // DEC A
     DEC(z80->a);
-    print_debug("DEC A (%x)\n", z80->a);
+    print_debug("DEC A (%X)\n", z80->a);
     break;
 
 case 0x3E: // LD A,n
@@ -222,27 +245,27 @@ case 0x3E: // LD A,n
     print_debug("LD A, 0x%.2x\n", z80->a);
     break;
 
-/*
 case 0x32: // LD (HL-),A
-    print_debug("H: %x\n", z80->h);
-    print_debug("L: %x\n", z80->l);
-    print_debug("HL: %x\n", D16(z80->h,z80->l));
+    print_debug("H: %X\n", z80->h);
+    print_debug("L: %X\n", z80->l);
+    print_debug("HL: %X\n", D16(z80->h, z80->l));
 
-    //writeMem(HL, A,gbcpu.mem);
-    //HL--;
+    write_byte(mmu, D16(z80->h, z80->l), z80->a);
+    DEC16(z80->h, z80->l);
+    z80->t = 8;
+    print_debug("LD (HL-), A ($%X)\n", z80->a);
     break;
-*/
 
 case 0x47: // LD B,A
     z80->b = z80->a;
     z80->t = 4;
-    print_debug("LD B, A ($%x)\n", z80->b);
+    print_debug("LD B, A ($%X)\n", z80->b);
     break;
 
 case 0x57: // LD D,A
     z80->d = z80->a;
     z80->t = 4;
-    print_debug("LD D, A ($%x)\n", z80->d);
+    print_debug("LD D, A ($%X)\n", z80->d);
     break;
 
 case 0x76: // HALT
@@ -262,9 +285,9 @@ case 0xAF: // XOR A
     n = z80->a; // DEBUG
     z80->a ^= z80->a;
     z80->a &= 255;
-    z80->f |= z80->a ? 0 : Z_FLAG;
+    set_Z(!z80->a);
     z80->t = 4;
-    print_debug("XOR A ($%x -> $%x)\n", n, z80->a);
+    print_debug("XOR A ($%X -> $%X)\n", n, z80->a);
     break;
 
 case 0xC3: // JP nn
@@ -281,7 +304,7 @@ case 0xC9: // RET
     z80->pc = read_word(mmu, z80->sp);
     z80->sp += 2;
     z80->t = 8;
-    print_debug("RET (PC: %x -> %x)\n", z80->sp, op_aux);
+    print_debug("RET (PC: %X -> %X)\n", z80->sp, op_aux);
     break;
 
 case 0xCB: // CB op codes
@@ -289,11 +312,11 @@ case 0xCB: // CB op codes
     switch (n & 0xFF) {
         case 0xBF: // RES 7,a
             RES(7, z80->a);
-            print_debug("RES 7, a ($%x)\n", z80->a);
+            print_debug("RES 7, a ($%X)\n", z80->a);
             break;
 
         default:
-            print_debug("Undefined CB OP_CODE: %x\n", op_code);
+            print_debug("Undefined CB OP_CODE: %X\n", op_code);
             return 1;
     }
     break;
@@ -309,7 +332,7 @@ case 0xCD: // CALL nn
     // Jump to nn (op_aux)
     z80->pc = op_aux;
     z80->t = 16;
-    print_debug("CALL $%x\n", op_aux);
+    print_debug("CALL $%X\n", op_aux);
     break;
 
 case 0xD0: // RET NC
@@ -321,7 +344,7 @@ case 0xD0: // RET NC
     } else {
         z80->t = 8;
     }
-    print_debug("RET NC (%x)\n", !(z80->f & C_FLAG));
+    print_debug("RET NC (%X)\n", !(z80->f & C_FLAG));
     break;
 
 // Put A into memory address $FF00+n.
@@ -329,14 +352,16 @@ case 0xE0: // LDH (n), A
     op_aux = 0xFF00 + read_byte(mmu, z80->pc++);
     write_byte(mmu, op_aux, z80->a);
     z80->t = 12;
-    print_debug("LDH $%x, A ($%x)\n", op_aux, z80->a);
+    print_debug("LDH $%X, A ($%X)\n", op_aux, z80->a);
     break;
 
 case 0xE6: // AND n
     n = read_byte(mmu, z80->pc++);
     z80->a &= n;
-    // TODO: What about H-FLAG?
-    z80->f = z80->a ? 0 : Z_FLAG;
+    set_Z(!z80->a);
+    set_N(0);
+    set_H(1);
+    set_C(0);
     z80->t = 8;
     print_debug("AND 0x%.2x [A: 0x%.2x]\n", n, z80->a);
     break;
@@ -401,24 +426,15 @@ case 0xFE: // CP, n
     op_aux = read_byte(mmu, z80->pc++);
     n = z80->a - op_aux;
 
-    // N Flag always set
-    z80->f = N_FLAG;
-
-    // C Flag set for no borrow [A < n]
-    if (n < 0) {
-        z80->f |= C_FLAG;
-    }
-
-    // Z Flag set if result is zero [A = n]
-    if (n == 0) {
-        z80->f |= Z_FLAG;
-    }
+    set_Z(!n);  // Z Flag set if result is zero [A = n]
+    set_N(1);  // N Flag always set
+    set_C(n < 0);  // C Flag set for no borrow [A < n]
 
     // H Flag set if no borrow from bit 4.
     // TODO: Verify this comparison
     if ((z80->a ^ (n & 0xFF) ^ op_aux) & 0x10) {
-        z80->f |= H_FLAG;
+        set_H(1);
     }
-    print_debug("CP, $%x (A: $%x) (F: $%x)\n", op_aux, z80->a, z80->f);
+    print_debug("CP, $%X (A: $%X) (F: $%X)\n", op_aux, z80->a, z80->f);
     z80->t = 4;
     break;
