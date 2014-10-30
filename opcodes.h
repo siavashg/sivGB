@@ -223,6 +223,14 @@ case 0x2A: // LDI A, HL
                 "[A: 0x%.2X -> 0x%.2X]\n", op_aux, w, n, z80->a);
     break;
 
+case 0x2B: // DEC HL
+    w = D16(z80->h, z80->l); // DEBUG
+    DEC16(z80->h, z80->l);
+    z80->t = 8;
+    print_debug("DEC HL [0x%.4X -> 0x%.4X]",
+                w, D16(z80->h, z80->l));
+    break;
+
 case 0x28: // JR Z, n
     // Jump to n if Z flag is set
     n = read_byte(mmu, z80->pc++);
@@ -295,9 +303,9 @@ case 0x70: // LD (HL), B
     op_aux = D16(z80->h, z80->l);
     write_byte(mmu, op_aux, z80->b);
     z80->t = 8;
-    print_debug("LD (HL), B"
-                "[HL: 0x%.4X]"
-                "[B: 0x%.2X]\n", op_aux, w, z80->b);
+    print_debug("LD (HL), B "
+                "[HL: 0x%.4X] "
+                "[B: 0x%.2X]\n", op_aux, z80->b);
     break;
 
 case 0x76: // HALT
