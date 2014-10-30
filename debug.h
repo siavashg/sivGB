@@ -1,6 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+//#define DEBUG_VERBOSE 1
+
 #define DEBUG 1
 #ifdef DEBUG
 #define print_debug(...) \

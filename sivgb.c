@@ -50,8 +50,8 @@ int run(Z80 *z80, MMU *mmu, LCD *lcd) {
         uint16_t w, op_aux;
 
         op_code = read_byte(mmu, z80->pc++);
-        print_debug("PC: 0x%.4x,\t"
-                    "OP: 0x%.2x\t"
+        print_debug("PC: 0x%.4X,\t"
+                    "OP: 0x%.2X\t"
                     "LCD: %.3i\t",
                     z80->pc, op_code, lcd->clock);
 
@@ -59,7 +59,7 @@ int run(Z80 *z80, MMU *mmu, LCD *lcd) {
         switch(op_code) {
             #include "opcodes.h"
             default:
-                print_debug("Undefined OP_CODE: 0x%.2x\n", op_code);
+                print_debug("Undefined OP_CODE: 0x%.2X\n", op_code);
                 return 1;
         }
         lcd->clock += z80->t;

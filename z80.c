@@ -33,6 +33,7 @@ int reset_z80(Z80 *z80) {
 }
 
 void debug_dump(Z80 *z80) {
+#ifdef DEBUG_VERBOSE
     print_debug(
         "PC: 0x%.4x\t"
         "SP: 0x%.4x\t"
@@ -58,4 +59,5 @@ void debug_dump(Z80 *z80) {
         z80->e, z80->h, z80->l, z80->f,
         z80->ime, z80->m, z80->t,
         z80->halt, z80->stop);
+#endif
 }
