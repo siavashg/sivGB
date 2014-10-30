@@ -514,6 +514,15 @@ case 0xE2: // LD (C), A
     print_debug("LD (C), A ($%X)\n", z80->a);
     break;
 
+case 0xE5: // PUSH HL
+    z80->sp--;
+    write_byte(mmu, z80->sp, z80->h);
+    z80->sp--;
+    write_byte(mmu, z80->sp, z80->l);
+    print_debug("PUSH HL (0x%.4X)\n", D16(z80->h, z80->l));
+    z80->t = 16;
+    break;
+
 case 0xE6: // AND n
     n = read_byte(mmu, z80->pc++);
     z80->a &= n;
