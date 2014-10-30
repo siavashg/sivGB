@@ -191,10 +191,10 @@ case 0x21: // LD HL,nn
     break;
 
 case 0x22: // LDI HL, A
-    op_aux = (z80->h << 8) + z80->l;
+    op_aux = D16(z80->h, z80->l);
     write_byte(mmu, op_aux, z80->a);
     INC16(z80->h, z80->l);
-    w = (z80->h << 8) + z80->l; // DEBUG
+    w = D16(z80->h, z80->l); // DEBUG
     z80->t = 8;
     print_debug("LDI HL, A"
                 "[HL: 0x%.4X -> 0x%.4X]"
@@ -213,10 +213,10 @@ case 0x25: // DEC H
 
 case 0x2A: // LDI A, HL
     n = z80->a; // DEBUG
-    op_aux = (z80->h << 8) + z80->l;
+    op_aux = D16(z80->h, z80->l);
     z80->a = read_byte(mmu, op_aux);
     INC16(z80->h, z80->l);
-    w = (z80->h << 8) + z80->l; // DEBUG
+    w = D16(z80->h, z80->l); // DEBUG
     z80->t = 8;
     print_debug("LDI A, HL"
                 "[HL: 0x%.4X -> 0x%.4X]"
@@ -291,6 +291,15 @@ case 0x57: // LD D,A
     print_debug("LD D, A ($%X)\n", z80->d);
     break;
 
+case 0x70: // LD (HL), B
+    op_aux = D16(z80->h, z80->l);
+    write_byte(mmu, op_aux, z80->b);
+    z80->t = 8;
+    print_debug("LD (HL), B"
+                "[HL: 0x%.4X]"
+                "[B: 0x%.2X]\n", op_aux, w, z80->b);
+    break;
+
 case 0x76: // HALT
     z80->halt = 1;
     z80->t = 4;
@@ -356,7 +365,7 @@ case 0xAF: // XOR A
     break;
 
 case 0xB6: // OR (HL)
-    op_aux = (z80->h << 8) + z80->l;
+    op_aux = D16(z80->h, z80->l);
     n = read_byte(mmu, op_aux);
     z80->a = z80->a | n;
     set_Z(!z80->a);
