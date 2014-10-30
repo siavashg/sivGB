@@ -109,15 +109,13 @@ uint8_t read_byte(MMU *mmu, uint16_t address) {
     // ERAM
     case 0xA000:
     case 0xB000:
-        print_debug("ERAM read not implemented\n");
-        exit(1);
+        return mmu->eram[address&0x1FFF];
 
     // WRAM
     case 0xC000:
     case 0xD000:
     case 0xE000: // ECHO
-        print_debug("WRAM read not implemented\n");
-        exit(1);
+        return mmu->wram[address&0x1FFF];
 
     // ECHO and REST
     case 0xF000:
@@ -127,13 +125,11 @@ uint8_t read_byte(MMU *mmu, uint16_t address) {
         case 0x400: case 0x500: case 0x600: case 0x700:
         case 0x800: case 0x900: case 0xA00: case 0xB00:
         case 0xC00: case 0xD00:
-            print_debug("ERAM read not implemented\n");
-            exit(1);
+            return mmu->echo[address&0x1FFF];
 
         // OAM
         case 0xE00:
-            print_debug("OAM read not implemented\n");
-            exit(1);
+            return mmu->OAM[address&0x00FF];
 
         // IO and High RAM
         case 0xF00:
@@ -167,8 +163,8 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
     case 0x5000: // Switchable ROM bank
     case 0x6000: // Switchable ROM bank
     case 0x7000: // Switchable ROM bank
-        print_debug("ROM write not implemented\n");
-        exit(1);
+        mmu->rom[address] = byte;
+        return 0;
 
     // VRAM
     case 0x8000:
