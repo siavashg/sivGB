@@ -197,8 +197,8 @@ case 0x22: // LDI HL, A
     w = (z80->h << 8) + z80->l; // DEBUG
     z80->t = 8;
     print_debug("LDI HL, A"
-                "[HL: 0x%.4x -> 0x%.4x]"
-                "[A: 0x%.2x]\n", op_aux, w, z80->a);
+                "[HL: 0x%.4X -> 0x%.4X]"
+                "[A: 0x%.2X]\n", op_aux, w, z80->a);
     break;
 
 case 0x24: // INC H
@@ -219,8 +219,8 @@ case 0x2A: // LDI A, HL
     w = (z80->h << 8) + z80->l; // DEBUG
     z80->t = 8;
     print_debug("LDI A, HL"
-                "[HL: 0x%.4x -> 0x%.4x]"
-                "[A: 0x%.2x -> 0x%.2x]\n", op_aux, w, n, z80->a);
+                "[HL: 0x%.4X -> 0x%.4X]"
+                "[A: 0x%.2X -> 0x%.2X]\n", op_aux, w, n, z80->a);
     break;
 
 case 0x2C: // INC L
@@ -301,30 +301,37 @@ case 0x7A: // LD A,D
 
 case 0x80: // ADD A,B
     ADD(z80->a, z80->b);
+    print_debug("ADD A, B ($%X)\n", z80->a);
     break;
 
 case 0x81: // ADD A,C
     ADD(z80->a, z80->c);
+    print_debug("ADD A, C ($%X)\n", z80->a);
     break;
 
 case 0x82: // ADD A,D
     ADD(z80->a, z80->d);
+    print_debug("ADD A, D ($%X)\n", z80->a);
     break;
 
 case 0x83: // ADD A,E
     ADD(z80->a, z80->e);
+    print_debug("ADD A, E ($%X)\n", z80->a);
     break;
 
 case 0x84: // ADD A,H
     ADD(z80->a, z80->h);
+    print_debug("ADD A, H ($%X)\n", z80->a);
     break;
 
 case 0x85: // ADD A,L
     ADD(z80->a, z80->l);
+    print_debug("ADD A, L ($%X)\n", z80->a);
     break;
 
 case 0x87: // ADD A,A
     ADD(z80->a, z80->a);
+    print_debug("ADD A, A ($%X)\n", z80->a);
     break;
 
 case 0xAF: // XOR A
@@ -335,6 +342,19 @@ case 0xAF: // XOR A
     z80->t = 4;
     print_debug("XOR A ($%X -> $%X)\n", n, z80->a);
     break;
+
+case 0xB6: // OR (HL)
+    op_aux = (z80->h << 8) + z80->l;
+    n = read_byte(mmu, op_aux);
+    z80->a = z80->a | n;
+    set_Z(!z80->a);
+    set_N(0);
+    set_H(0);
+    set_C(0);
+    z80->t = 8;
+    print_debug("OR (HL) ($%X: %X)\n", op_aux, z80->a);
+    break;
+
 
 case 0xC3: // JP nn
     // No need to increment z80->pc since jump
@@ -406,6 +426,14 @@ case 0xE0: // LDH (n), A
     print_debug("LDH $%X, A ($%X)\n", op_aux, z80->a);
     break;
 
+// Put A into memory address $FF00 + register C
+case 0xE2: // LD (C), A
+    op_aux = 0xFF00 + z80->c;
+    write_byte(mmu, op_aux, z80->a);
+    z80->t = 8;
+    print_debug("LD (C), A ($%X)\n", z80->a);
+    break;
+
 case 0xE6: // AND n
     n = read_byte(mmu, z80->pc++);
     z80->a &= n;
@@ -424,8 +452,8 @@ case 0xEA: // LD (nn), A
     write_byte(mmu, op_aux, z80->a);
     z80->t = 16;
     print_debug("LD (nn), A "
-                "[nn: $%.4x] "
-                "[A %.2x]\n", op_aux, z80->a);
+                "[nn: $%.4X] "
+                "[A %.2X]\n", op_aux, z80->a);
     break;
 
 // Put memory address $FF00+n into A.
@@ -433,7 +461,7 @@ case 0xF0: // LDH A, (n)
     op_aux = 0xFF00 + read_byte(mmu, z80->pc++);
     z80->a = read_byte(mmu, op_aux);
     z80->t = 12;
-    print_debug("LDH A, 0x%.4x (0x%.2x)\n", op_aux, z80->a);
+    print_debug("LDH A, 0x%.4X (0x%.2X)\n", op_aux, z80->a);
     break;
 
 case 0xF1: // POP AF
