@@ -26,6 +26,17 @@
         set_H(reg == 0xF); \
         z80->t = 4;
 
+// TODO: Verify H and C flags
+#define ADD(reg, n) \
+        reg += n; \
+        reg &= 0xFF; \
+        set_Z(!reg); \
+        set_N(0); \
+        set_H(reg & 0x10); \
+        set_C(reg & 0x100); \
+        z80->t = 4;
+
+
 #define INC16(h, l) \
     l++; \
     l &= 0xFF; \
@@ -279,6 +290,41 @@ case 0x76: // HALT
         z80->pc++;
     }
     print_debug("HALT\n");
+    debug_step = true;
+    break;
+
+case 0x7A: // LD A,D
+    z80->a = z80->d;
+    z80->t = 4;
+    print_debug("LD A, D ($%X)\n", z80->a);
+    break;
+
+case 0x80: // ADD A,B
+    ADD(z80->a, z80->b);
+    break;
+
+case 0x81: // ADD A,C
+    ADD(z80->a, z80->c);
+    break;
+
+case 0x82: // ADD A,D
+    ADD(z80->a, z80->d);
+    break;
+
+case 0x83: // ADD A,E
+    ADD(z80->a, z80->e);
+    break;
+
+case 0x84: // ADD A,H
+    ADD(z80->a, z80->h);
+    break;
+
+case 0x85: // ADD A,L
+    ADD(z80->a, z80->l);
+    break;
+
+case 0x87: // ADD A,A
+    ADD(z80->a, z80->a);
     break;
 
 case 0xAF: // XOR A
@@ -295,7 +341,12 @@ case 0xC3: // JP nn
     op_aux = read_word(mmu, z80->pc);
     z80->pc = op_aux;
     z80->t = 16;
-    print_debug("JP %x\n", op_aux);
+    print_debug("JP %X\n", op_aux);
+    break;
+
+case 0xC6: // ADD A,n
+    n = read_byte(mmu, z80->pc++);
+    ADD(z80->a, n);
     break;
 
 case 0xC9: // RET
