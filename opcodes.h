@@ -223,6 +223,18 @@ case 0x2A: // LDI A, HL
                 "[A: 0x%.2X -> 0x%.2X]\n", op_aux, w, n, z80->a);
     break;
 
+case 0x28: // JR Z, n
+    // Jump to n if Z flag is set
+    n = read_byte(mmu, z80->pc++);
+    if (z80->f & Z_FLAG) {
+        z80->pc += n;
+        z80->t = 12;
+    } else {
+        z80->t = 8;
+    }
+    print_debug("JR Z (%X), 0x%.2x\n", (z80->f & Z_FLAG), n);
+    break;
+
 case 0x2C: // INC L
     INC(z80->l);
     print_debug("INC L (%X)\n", z80->l);
