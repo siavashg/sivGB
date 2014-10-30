@@ -367,6 +367,18 @@ case 0x7A: // LD A,D
     print_debug("LD A, D ($%X)\n", z80->a);
     break;
 
+case 0x7C: // LD A,H
+    z80->a = z80->h;
+    z80->t = 4;
+    print_debug("LD A, H ($%X)\n", z80->a);
+    break;
+
+case 0x7D: // LD A,L
+    z80->a = z80->l;
+    z80->t = 4;
+    print_debug("LD A, L ($%X)\n", z80->a);
+    break;
+
 case 0x80: // ADD A,B
     ADD(z80->a, z80->b);
     print_debug("ADD A, B ($%X)\n", z80->a);
