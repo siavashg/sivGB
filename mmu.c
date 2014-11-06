@@ -99,6 +99,10 @@ uint8_t read_byte(MMU *mmu, uint16_t address) {
     case 0x1000:
     case 0x2000:
     case 0x3000:
+    case 0x4000:
+    case 0x5000:
+    case 0x6000:
+    case 0x7000:
         return mmu->rom[address];
 
     // VRAM
