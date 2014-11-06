@@ -201,6 +201,11 @@ case 0x22: // LDI HL, A
                 "[A: 0x%.2X]\n", op_aux, w, z80->a);
     break;
 
+case 0x23: // INC HL
+    INC16(z80->h, z80->l);
+    print_debug("INC HL (0x%.4X)\n", D16(z80->h, z80->l));
+    break;
+
 case 0x24: // INC H
     INC(z80->h);
     print_debug("INC H (%X)\n", z80->h);
@@ -435,6 +440,12 @@ case 0xB6: // OR (HL)
     print_debug("OR (HL) ($%X: %X)\n", op_aux, z80->a);
     break;
 
+case 0xC1: // POP BC
+    z80->b = read_byte(mmu, z80->sp++);
+    z80->c = read_byte(mmu, z80->sp++);
+    print_debug("POP BC [BC: 0x%.4X]\n", D16(z80->b, z80->c));
+    z80->t = 12;
+    break;
 
 case 0xC3: // JP nn
     // No need to increment z80->pc since jump
@@ -498,12 +509,26 @@ case 0xD0: // RET NC
     print_debug("RET NC (%X)\n", !(z80->f & C_FLAG));
     break;
 
+case 0xD1: // POP DE
+    z80->d = read_byte(mmu, z80->sp++);
+    z80->e = read_byte(mmu, z80->sp++);
+    print_debug("POP DE [DE: 0x%.4X]\n", D16(z80->d, z80->e));
+    z80->t = 12;
+    break;
+
 // Put A into memory address $FF00+n.
 case 0xE0: // LDH (n), A
     op_aux = 0xFF00 + read_byte(mmu, z80->pc++);
     write_byte(mmu, op_aux, z80->a);
     z80->t = 12;
     print_debug("LDH $%X, A ($%X)\n", op_aux, z80->a);
+    break;
+
+case 0xE1: // POP HL
+    z80->h = read_byte(mmu, z80->sp++);
+    z80->l = read_byte(mmu, z80->sp++);
+    print_debug("POP HL [HL: 0x%.4X]\n", D16(z80->h, z80->l));
+    z80->t = 12;
     break;
 
 // Put A into memory address $FF00 + register C
