@@ -8,22 +8,20 @@
 #define set_H(x) z80->f = ((z80->f & (0xFF - H_FLAG)) | ((x)<<5))
 #define set_C(x) z80->f = ((z80->f & (0xFF - C_FLAG)) | ((x)<<4))
 
-// TODO: Verify H flag
 #define INC(reg) \
+        set_H((reg & 0x0F) == 0x0F); \
         reg++; \
         reg &= 0xFF; \
         set_Z(!reg); \
         set_N(0); \
-        set_H(reg == 0x10); \
         z80->t = 4;
 
-// TODO: Verify H flag
 #define DEC(reg) \
+        set_H(!(reg & 0x0F)); \
         reg--; \
         reg &= 0xFF; \
         set_Z(!reg); \
         set_N(1); \
-        set_H(reg == 0xF); \
         z80->t = 4;
 
 // TODO: Verify H and C flags
