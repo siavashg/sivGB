@@ -31,7 +31,4 @@ uint16_t read_word(MMU *mmu, uint16_t address);
 uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte);
 uint16_t write_word(MMU *mmu, uint16_t address, uint16_t word);
 
-#define RES(bit, byte)\
-        byte &= ~(0x1 << bit)
-
 #endif // MMU_H

@@ -3,6 +3,7 @@
 #define D16(h,l) ((h << 8) | l)
 
 /* Flags */
+#define CLEAR_FLAGS() z80->f = 0
 #define set_Z(x) z80->f = ((z80->f & (0xFF - Z_FLAG)) | ((x)<<7))
 #define set_N(x) z80->f = ((z80->f & (0xFF - N_FLAG)) | ((x)<<6))
 #define set_H(x) z80->f = ((z80->f & (0xFF - H_FLAG)) | ((x)<<5))
@@ -34,6 +35,21 @@
         set_C(reg & 0x100); \
         z80->t = 4;
 
+#define ADDHL(a, b) \
+        op_aux = D16(z80->h, z80->l) + D16(a, b) & 0xFFFF; \
+        z80->h = op_aux >> 8; \
+        z80->l = op_aux & 0xFF; \
+        set_N(0); \
+        set_H((D16(z80->h, z80->l) & 0x0F) + (D16(a, b) & 0x0F) > 0x0F); \
+        set_C(op_aux > 0xFFFF); \
+        z80->t = 8;
+
+#define XOR(r) \
+    r ^= r; \
+    r &= 0xFF; \
+    CLEAR_FLAGS(); \
+    set_Z(!r); \
+    z80->t = 4; \
 
 #define INC16(h, l) \
     l++; \
@@ -46,10 +62,22 @@
 #define DEC16(h, l) \
     l--; \
     l &= 0xFF; \
-    if(!l) { \
+    if(l == 0xFF) { \
         h--; \
         h &= 0xFF; \
     }
+
+
+#define RES(bit, byte)\
+        byte &= ~(0x1 << bit)
+
+#define SWAP(byte)\
+        byte = (byte >> 4 | byte << 4); \
+        set_Z(!byte); \
+        set_N(0); \
+        set_H(0); \
+        set_C(0);
+
 
 case 0x00: // NOP
 case 0x40: // LD B,B
@@ -97,6 +125,14 @@ case 0x07: // RLCA
     set_H(0);
     z80->t = 4;
     print_debug("RLCA ($%X -> $%X)\n", n, z80->a);
+    break;
+
+case 0x0B: // DEC BC
+    w = D16(z80->b, z80->c); // DEBUG
+    DEC16(z80->b, z80->c);
+    z80->t = 8;
+    print_debug("DEC BC [0x%.4X -> 0x%.4X]\n",
+                w, D16(z80->b, z80->c));
     break;
 
 case 0x0C: // INC C
@@ -152,11 +188,21 @@ case 0x15: // DEC D
     print_debug("DEC D (%X)\n", z80->d);
     break;
 
+case 0x16: // LD D,n
+    z80->d = read_byte(mmu, z80->pc++);
+    z80->t = 8;
+    print_debug("LD D, 0x%.2X\n", z80->d);
+    break;
+
 case 0x18: // JR n
     n = read_byte(mmu, z80->pc++);
     z80->pc += n;
     z80->t = 12;
-    print_debug("JR 0x%.2x\n", n);
+
+case 0x19: // ADD HL,DE
+    ADDHL(z80->d, z80->e);
+    print_debug("ADD HL, DE 0x%.4X\n", D16(z80->h, z80->l));
+    debug_step = true;
     break;
 
 case 0x1C: // INC E
@@ -255,12 +301,40 @@ case 0x2D: // DEC L
     DEC(z80->l);
     print_debug("DEC L (%X)\n", z80->l);
     break;
+    
+case 0x2F: // CPL
+    w = z80->a; // DEBUG
+    z80->a ^= 0xFF;
+    set_N(1);
+    set_H(1);
+    z80->t = 4;
+    print_debug("CPL (%X -> %X)\n", w, z80->a);
+    break;
 
 case 0x31: // LD SP,nn
     z80->sp = read_word(mmu, z80->pc);
     z80->pc += 2;
     z80->t = 12;
     print_debug("LD SP, $%hx\n", z80->sp);
+    break;
+
+case 0x32: // LD (HL-),A
+    op_aux = D16(z80->h, z80->l);
+    write_byte(mmu, D16(z80->h, z80->l), z80->a);
+    DEC16(z80->h, z80->l);
+    z80->t = 8;
+    print_debug(
+        "LD (HL-)(0x%.4X -> 0x%.4X), A ($%X)\n",
+        op_aux, D16(z80->h, z80->l),  z80->a);
+    break;
+
+case 0x36: // LD (HL),n
+    op_aux = D16(z80->h, z80->l);
+    n = read_byte(mmu, z80->pc++);
+    write_byte(mmu, op_aux, n);
+    z80->t = 12;
+    print_debug("LD (HL), n "
+                "[HL: 0x%.4X, n: 0x%.2X]\n", op_aux, n);
     break;
 
 case 0x3C: // INC A
@@ -296,10 +370,22 @@ case 0x47: // LD B,A
     print_debug("LD B, A ($%X)\n", z80->b);
     break;
 
+case 0x4F: // LD C,A
+    z80->c = z80->a;
+    z80->t = 4;
+    print_debug("LD C, A ($%X)\n", z80->c);
+    break;
+
 case 0x57: // LD D,A
     z80->d = z80->a;
     z80->t = 4;
     print_debug("LD D, A ($%X)\n", z80->d);
+    break;
+
+case 0x5F: // LD E,A
+    z80->e = z80->a;
+    z80->t = 4;
+    print_debug("LD E, A ($%X)\n", z80->e);
     break;
 
 case 0x70: // LD (HL), B
@@ -364,6 +450,18 @@ case 0x76: // HALT
     debug_step = true;
     break;
 
+case 0x78: // LD A,B
+    z80->a = z80->b;
+    z80->t = 4;
+    print_debug("LD A, B ($%X)\n", z80->a);
+    break;
+
+case 0x79: // LD A,C
+    z80->a = z80->c;
+    z80->t = 4;
+    print_debug("LD A, C ($%X)\n", z80->a);
+    break;
+
 case 0x7A: // LD A,D
     z80->a = z80->d;
     z80->t = 4;
@@ -417,13 +515,68 @@ case 0x87: // ADD A,A
     print_debug("ADD A, A ($%X)\n", z80->a);
     break;
 
-case 0xAF: // XOR A
+case 0xA1: // AND C
     n = z80->a; // DEBUG
-    z80->a ^= z80->a;
+    z80->a &= z80->c;
     z80->a &= 255;
     set_Z(!z80->a);
+    set_N(0);
+    set_H(1);
+    set_C(0);
     z80->t = 4;
+    print_debug("AND C (A: $%X -> $%X)\n", n, z80->a);
+    break;
+
+case 0xA9: // XOR C
+    n = z80->c; // DEBUG
+    XOR(z80->c);
+    print_debug("XOR C ($%X -> $%X)\n", n, z80->c);
+    break;
+
+case 0xAF: // XOR A
+    n = z80->a; // DEBUG
+    XOR(z80->a);
     print_debug("XOR A ($%X -> $%X)\n", n, z80->a);
+    break;
+
+case 0xB0: // OR B
+    z80->a = z80->a | z80->b;
+    set_Z(!z80->a);
+    set_N(0);
+    set_H(0);
+    set_C(0);
+    z80->t = 4;
+    print_debug("OR B ($%X: %X)\n", z80->b, z80->a);
+    break;
+
+case 0xB1: // OR C
+    z80->a = z80->a | z80->c;
+    set_Z(!z80->a);
+    set_N(0);
+    set_H(0);
+    set_C(0);
+    z80->t = 4;
+    print_debug("OR C ($%X: %X)\n", z80->c, z80->a);
+    break;
+
+case 0xB2: // OR D
+    z80->a = z80->a | z80->d;
+    set_Z(!z80->a);
+    set_N(0);
+    set_H(0);
+    set_C(0);
+    z80->t = 4;
+    print_debug("OR D ($%X: %X)\n", z80->d, z80->a);
+    break;
+
+case 0xB3: // OR E
+    z80->a = z80->a | z80->e;
+    set_Z(!z80->a);
+    set_N(0);
+    set_H(0);
+    set_C(0);
+    z80->t = 4;
+    print_debug("OR E ($%X: %X)\n", z80->e, z80->a);
     break;
 
 case 0xB6: // OR (HL)
@@ -475,8 +628,13 @@ case 0xCB: // CB op codes
             print_debug("RES 7, a ($%X)\n", z80->a);
             break;
 
+        case 0x37: // SWAP A
+            SWAP(z80->a)
+            print_debug("SWAP A ($%X)\n", z80->a);
+            break;
+
         default:
-            print_debug("Undefined CB OP_CODE: %X\n", op_code);
+            print_debug("Undefined CB OP_CODE: CB %X\n", n);
             return 1;
     }
     break;
@@ -567,6 +725,15 @@ case 0xEA: // LD (nn), A
                 "[nn: $%.4X] "
                 "[A %.2X]\n", op_aux, z80->a);
     break;
+
+// TODO: Untested
+case 0xEF: // RST 28H
+    op_aux = read_word(mmu, z80->pc);
+    z80->sp -= 2;
+    write_word(mmu, z80->sp, op_aux);
+    z80->pc = 0x28;
+    z80->t = 16;
+    print_debug("RST 28HA");
 
 // Put memory address $FF00+n into A.
 case 0xF0: // LDH A, (n)
