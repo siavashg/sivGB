@@ -202,7 +202,6 @@ case 0x18: // JR n
 case 0x19: // ADD HL,DE
     ADDHL(z80->d, z80->e);
     print_debug("ADD HL, DE 0x%.4X\n", D16(z80->h, z80->l));
-    debug_step = true;
     break;
 
 case 0x1C: // INC E
