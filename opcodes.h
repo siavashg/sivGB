@@ -132,7 +132,7 @@ case 0x0B: // DEC BC
     DEC16(z80->b, z80->c);
     z80->t = 8;
     print_debug("DEC BC [0x%.4X -> 0x%.4X]\n",
-                w, D16(z80->b, z80->c));
+        w, D16(z80->b, z80->c));
     break;
 
 case 0x0C: // INC C
@@ -160,22 +160,22 @@ case 0x11: // LD DE,nn
 
 case 0x12: // LD DE,A
     z80->e = read_byte(mmu, z80->a);
-    z80->d = read_byte(mmu, z80->a+1);
+    z80->d = read_byte(mmu, z80->a + 1);
     /* TODO: Potentially more optimized as:
         op_aux = read_word(mmu, z80->a);
         z80->e = op_aux & 0xFF;
         z80->d = (op_aux >> 8) & 0xFF;
     */
     z80->t = 8;
-    print_debug("LD DE, A [DE: 0x%.2x%.2x]\n", z80->d, z80->e);
+    print_debug("LD DE, A [DE: 0x%.2X%.2X]\n", z80->d, z80->e);
     break;
 
 case 0x13: // INC DE
     w = (z80->d << 8) + z80->e; // DEBUG
     INC16(z80->d, z80->e);
     z80->t = 8;
-    print_debug("INC DE [0x%.4x -> 0x%.2x%.2x]\n",
-                w, z80->d, z80->e);
+    print_debug("INC DE [0x%.4X -> 0x%.2X%.2X]\n",
+        w, z80->d, z80->e);
     break;
 
 case 0x14: // INC D
@@ -198,6 +198,8 @@ case 0x18: // JR n
     n = read_byte(mmu, z80->pc++);
     z80->pc += n;
     z80->t = 12;
+    print_debug("JR 0x%.2X\n", n);
+    break;
 
 case 0x19: // ADD HL,DE
     ADDHL(z80->d, z80->e);
@@ -220,17 +222,18 @@ case 0x20: // JR NZ, n
     if (!(z80->f & Z_FLAG)) {
         z80->pc += n;
         z80->t = 12;
-    } else {
+    }
+    else {
         z80->t = 8;
     }
-    print_debug("JR NZ (%X), 0x%.2x\n", !(z80->f & Z_FLAG), n);
+    print_debug("JR NZ (%X), 0x%.2X\n", !(z80->f & Z_FLAG), n);
     break;
 
 case 0x21: // LD HL,nn
     z80->l = read_byte(mmu, z80->pc++);
     z80->h = read_byte(mmu, z80->pc++);
     z80->t = 12;
-    print_debug("LD HL, 0x%.2x%.2x\n", z80->h, z80->l);
+    print_debug("LD HL, 0x%.2X%.2X\n", z80->h, z80->l);
     break;
 
 case 0x22: // LDI HL, A
@@ -240,13 +243,16 @@ case 0x22: // LDI HL, A
     w = D16(z80->h, z80->l); // DEBUG
     z80->t = 8;
     print_debug("LDI HL, A"
-                "[HL: 0x%.4X -> 0x%.4X]"
-                "[A: 0x%.2X]\n", op_aux, w, z80->a);
+        "[HL: 0x%.4X -> 0x%.4X]"
+        "[A: 0x%.2X]\n", op_aux, w, z80->a);
     break;
 
 case 0x23: // INC HL
+    w = (z80->h << 8) + z80->l; // DEBUG
     INC16(z80->h, z80->l);
-    print_debug("INC HL (0x%.4X)\n", D16(z80->h, z80->l));
+    z80->t = 8;
+    print_debug("INC HL [0x%.4X -> 0x%.2X%.2X]\n",
+        w, z80->h, z80->l);
     break;
 
 case 0x24: // INC H
@@ -267,8 +273,8 @@ case 0x2A: // LDI A, HL
     w = D16(z80->h, z80->l); // DEBUG
     z80->t = 8;
     print_debug("LDI A, HL"
-                "[HL: 0x%.4X -> 0x%.4X]"
-                "[A: 0x%.2X -> 0x%.2X]\n", op_aux, w, n, z80->a);
+        "[HL: 0x%.4X -> 0x%.4X]"
+        "[A: 0x%.2X -> 0x%.2X]\n", op_aux, w, n, z80->a);
     break;
 
 case 0x2B: // DEC HL
@@ -276,7 +282,7 @@ case 0x2B: // DEC HL
     DEC16(z80->h, z80->l);
     z80->t = 8;
     print_debug("DEC HL [0x%.4X -> 0x%.4X]",
-                w, D16(z80->h, z80->l));
+        w, D16(z80->h, z80->l));
     break;
 
 case 0x28: // JR Z, n
@@ -285,10 +291,11 @@ case 0x28: // JR Z, n
     if (z80->f & Z_FLAG) {
         z80->pc += n;
         z80->t = 12;
-    } else {
+    }
+    else {
         z80->t = 8;
     }
-    print_debug("JR Z (%X), 0x%.2x\n", (z80->f & Z_FLAG), n);
+    print_debug("JR Z (%X), 0x%.2X\n", (z80->f & Z_FLAG), n);
     break;
 
 case 0x2C: // INC L
@@ -300,7 +307,7 @@ case 0x2D: // DEC L
     DEC(z80->l);
     print_debug("DEC L (%X)\n", z80->l);
     break;
-    
+
 case 0x2F: // CPL
     w = z80->a; // DEBUG
     z80->a ^= 0xFF;
@@ -324,7 +331,7 @@ case 0x32: // LD (HL-),A
     z80->t = 8;
     print_debug(
         "LD (HL-)(0x%.4X -> 0x%.4X), A ($%X)\n",
-        op_aux, D16(z80->h, z80->l),  z80->a);
+        op_aux, D16(z80->h, z80->l), z80->a);
     break;
 
 case 0x36: // LD (HL),n
@@ -333,7 +340,7 @@ case 0x36: // LD (HL),n
     write_byte(mmu, op_aux, n);
     z80->t = 12;
     print_debug("LD (HL), n "
-                "[HL: 0x%.4X, n: 0x%.2X]\n", op_aux, n);
+        "[HL: 0x%.4X, n: 0x%.2X]\n", op_aux, n);
     break;
 
 case 0x3C: // INC A
@@ -349,18 +356,7 @@ case 0x3D: // DEC A
 case 0x3E: // LD A,n
     z80->a = read_byte(mmu, z80->pc++);
     z80->t = 8;
-    print_debug("LD A, 0x%.2x\n", z80->a);
-    break;
-
-case 0x32: // LD (HL-),A
-    print_debug("H: %X\n", z80->h);
-    print_debug("L: %X\n", z80->l);
-    print_debug("HL: %X\n", D16(z80->h, z80->l));
-
-    write_byte(mmu, D16(z80->h, z80->l), z80->a);
-    DEC16(z80->h, z80->l);
-    z80->t = 8;
-    print_debug("LD (HL-), A ($%X)\n", z80->a);
+    print_debug("LD A, 0x%.2X\n", z80->a);
     break;
 
 case 0x47: // LD B,A
@@ -375,6 +371,13 @@ case 0x4F: // LD C,A
     print_debug("LD C, A ($%X)\n", z80->c);
     break;
 
+case 0x56: // LD D, (HL)
+    op_aux = D16(z80->h, z80->l);
+    z80->d = read_byte(mmu, op_aux);
+    z80->t = 8;
+    print_debug("LD (HL), D ($%X)\n", z80->d);
+    break;
+
 case 0x57: // LD D,A
     z80->d = z80->a;
     z80->t = 4;
@@ -387,12 +390,19 @@ case 0x5F: // LD E,A
     print_debug("LD E, A ($%X)\n", z80->e);
     break;
 
+case 0x5E: // LD E, (HL)
+    op_aux = D16(z80->h, z80->l);
+    z80->e = read_byte(mmu, op_aux);
+    z80->t = 8;
+    print_debug("LD (HL), E ($%X)\n", z80->e);
+    break;
+
 case 0x70: // LD (HL), B
     op_aux = D16(z80->h, z80->l);
     write_byte(mmu, op_aux, z80->b);
     z80->t = 8;
     print_debug("LD (HL), B "
-                "[HL: 0x%.4X, B: 0x%.2X]\n", op_aux, z80->b);
+        "[HL: 0x%.4X, B: 0x%.2X]\n", op_aux, z80->b);
     break;
 
 case 0x71: // LD (HL), C
@@ -400,7 +410,7 @@ case 0x71: // LD (HL), C
     write_byte(mmu, op_aux, z80->c);
     z80->t = 8;
     print_debug("LD (HL), C "
-                "[HL: 0x%.4X, C: 0x%.2X]\n", op_aux, z80->c);
+        "[HL: 0x%.4X, C: 0x%.2X]\n", op_aux, z80->c);
     break;
 
 case 0x72: // LD (HL), D
@@ -408,7 +418,7 @@ case 0x72: // LD (HL), D
     write_byte(mmu, op_aux, z80->d);
     z80->t = 8;
     print_debug("LD (HL), D "
-                "[HL: 0x%.4X, D: 0x%.2X]\n", op_aux, z80->d);
+        "[HL: 0x%.4X, D: 0x%.2X]\n", op_aux, z80->d);
     break;
 
 case 0x73: // LD (HL), E
@@ -416,7 +426,7 @@ case 0x73: // LD (HL), E
     write_byte(mmu, op_aux, z80->e);
     z80->t = 8;
     print_debug("LD (HL), E "
-                "[HL: 0x%.4X, E: 0x%.2X]\n", op_aux, z80->e);
+        "[HL: 0x%.4X, E: 0x%.2X]\n", op_aux, z80->e);
     break;
 
 case 0x74: // LD (HL), H
@@ -424,7 +434,7 @@ case 0x74: // LD (HL), H
     write_byte(mmu, op_aux, z80->h);
     z80->t = 8;
     print_debug("LD (HL), H "
-                "[HL: 0x%.4X, H: 0x%.2X]\n", op_aux, z80->h);
+        "[HL: 0x%.4X, H: 0x%.2X]\n", op_aux, z80->h);
     break;
 
 case 0x75: // LD (HL), L
@@ -432,7 +442,7 @@ case 0x75: // LD (HL), L
     write_byte(mmu, op_aux, z80->l);
     z80->t = 8;
     print_debug("LD (HL), L "
-                "[HL: 0x%.4X, L: 0x%.2X]\n", op_aux, z80->l);
+        "[HL: 0x%.4X, L: 0x%.2X]\n", op_aux, z80->l);
     break;
 
 case 0x76: // HALT
@@ -446,7 +456,7 @@ case 0x76: // HALT
         z80->pc++;
     }
     print_debug("HALT\n");
-    debug_step = true;
+    //debug_step = true;
     break;
 
 case 0x78: // LD A,B
@@ -602,7 +612,16 @@ case 0xC3: // JP nn
     op_aux = read_word(mmu, z80->pc);
     z80->pc = op_aux;
     z80->t = 16;
-    print_debug("JP %X\n", op_aux);
+    print_debug("JP 0x%.4X\n", op_aux);
+    break;
+
+case 0xC5: // PUSH BC
+    z80->sp--;
+    write_byte(mmu, z80->sp, z80->b);
+    z80->sp--;
+    write_byte(mmu, z80->sp, z80->c);
+    print_debug("PUSH BC\n");
+    z80->t = 16;
     break;
 
 case 0xC6: // ADD A,n
@@ -622,19 +641,19 @@ case 0xC9: // RET
 case 0xCB: // CB op codes
     n = read_byte(mmu, z80->pc++);
     switch (n & 0xFF) {
-        case 0xBF: // RES 7,a
-            RES(7, z80->a);
-            print_debug("RES 7, a ($%X)\n", z80->a);
-            break;
+    case 0xBF: // RES 7,a
+        RES(7, z80->a);
+        print_debug("RES 7, a ($%X)\n", z80->a);
+        break;
 
-        case 0x37: // SWAP A
-            SWAP(z80->a)
+    case 0x37: // SWAP A
+        SWAP(z80->a)
             print_debug("SWAP A ($%X)\n", z80->a);
-            break;
+        break;
 
-        default:
-            print_debug("Undefined CB OP_CODE: CB %X\n", n);
-            return 1;
+    default:
+        print_debug("Undefined CB OP_CODE: CB %X\n", n);
+        return 1;
     }
     break;
 
@@ -658,7 +677,8 @@ case 0xD0: // RET NC
         z80->pc = read_word(mmu, z80->sp);
         z80->sp += 2;
         z80->t = 20;
-    } else {
+    }
+    else {
         z80->t = 8;
     }
     print_debug("RET NC (%X)\n", !(z80->f & C_FLAG));
@@ -671,7 +691,16 @@ case 0xD1: // POP DE
     z80->t = 12;
     break;
 
-// Put A into memory address $FF00+n.
+case 0xD5: // PUSH DE
+    z80->sp--;
+    write_byte(mmu, z80->sp, z80->d);
+    z80->sp--;
+    write_byte(mmu, z80->sp, z80->e);
+    print_debug("PUSH DE\n");
+    z80->t = 16;
+    break;
+
+    // Put A into memory address $FF00+n.
 case 0xE0: // LDH (n), A
     op_aux = 0xFF00 + read_byte(mmu, z80->pc++);
     write_byte(mmu, op_aux, z80->a);
@@ -686,7 +715,7 @@ case 0xE1: // POP HL
     z80->t = 12;
     break;
 
-// Put A into memory address $FF00 + register C
+    // Put A into memory address $FF00 + register C
 case 0xE2: // LD (C), A
     op_aux = 0xFF00 + z80->c;
     write_byte(mmu, op_aux, z80->a);
@@ -711,30 +740,37 @@ case 0xE6: // AND n
     set_H(1);
     set_C(0);
     z80->t = 8;
-    print_debug("AND 0x%.2x [A: 0x%.2x]\n", n, z80->a);
+    print_debug("AND 0x%.2X [A: 0x%.2X]\n", n, z80->a);
     break;
 
-// Put A into memory address nn
+case 0xE9: // JP (HL)
+    // No need to increment z80->pc since jump
+    z80->pc = D16(z80->h, z80->l);
+    z80->t = 4;
+    print_debug("JP (HL) 0x%.4X\n", z80->pc);
+    break;
+
+    // Put A into memory address nn
 case 0xEA: // LD (nn), A
     op_aux = read_word(mmu, z80->pc++);
     z80->pc++;
     write_byte(mmu, op_aux, z80->a);
     z80->t = 16;
     print_debug("LD (nn), A "
-                "[nn: $%.4X] "
-                "[A %.2X]\n", op_aux, z80->a);
+        "[nn: $%.4X] "
+        "[A %.2X]\n", op_aux, z80->a);
     break;
 
-// TODO: Untested
+    // TODO: Untested
 case 0xEF: // RST 28H
     op_aux = read_word(mmu, z80->pc);
     z80->sp -= 2;
     write_word(mmu, z80->sp, op_aux);
     z80->pc = 0x28;
     z80->t = 16;
-    print_debug("RST 28HA");
+    print_debug("RST 28HA\n");
 
-// Put memory address $FF00+n into A.
+    // Put memory address $FF00+n into A.
 case 0xF0: // LDH A, (n)
     op_aux = 0xFF00 + read_byte(mmu, z80->pc++);
     z80->a = read_byte(mmu, op_aux);
