@@ -212,6 +212,16 @@ case 0x1D: // DEC E
     print_debug("DEC E (%X)\n", z80->e);
     break;
 
+case 0x1F: // RRA
+    n = C_FLAG;
+    set_C(z80->a & 1);
+    z80->a = (z80->a >> 1) | (n << 7);
+    z80->t = 4;
+    // TODO: Unsure if this is correct
+    //Z_FLAG = (z80->a == 0);
+    print_debug("RRA [A: 0x%.2X]\n", z80->a);
+    break;
+
 case 0x20: // JR NZ, n
     // Jump to n if Z flag is reset
     n = read_byte(mmu, z80->pc++);
@@ -312,6 +322,20 @@ case 0x2F: // CPL
     z80->t = 4;
     print_debug("CPL (%X -> %X)\n", w, z80->a);
     break;
+
+case 0x30: // JR NC, n
+    // Jump to n if C flag is reset
+    n = read_byte(mmu, z80->pc++);
+    if (!(z80->f & C_FLAG)) {
+        z80->pc += n;
+        z80->t = 12;
+    }
+    else {
+        z80->t = 8;
+    }
+    print_debug("JR NC (%X), 0x%.2X\n", !(z80->f & C_FLAG), n);
+    break;
+
 
 case 0x31: // LD SP,nn
     z80->sp = read_word(mmu, z80->pc);
@@ -667,6 +691,16 @@ case 0xCD: // CALL nn
     print_debug("CALL $%X\n", op_aux);
     break;
 
+case 0xCE: // ADC A,n
+    n = z80->a;
+    z80->a = z80->a + read_byte(mmu, z80->pc) + C_FLAG;
+    set_Z(!z80->a);
+    set_N(0);
+    set_C(z80->a < n);
+    print_debug("ADC A,%.2x [A: 0x%.2x]\n", z80->pc, z80->a);
+    z80->pc += 2;
+    break;
+
 case 0xD0: // RET NC
     // Return if carry flag is reset
     if (!(z80->f & C_FLAG)) {
@@ -694,6 +728,22 @@ case 0xD5: // PUSH DE
     write_byte(mmu, z80->sp, z80->e);
     print_debug("PUSH DE\n");
     z80->t = 16;
+    break;
+
+case 0xD6: // SUB d8
+    op_aux = read_byte(mmu, z80->pc);
+    n = z80->a - op_aux;
+    set_Z(!n); // Set if result is zero
+    set_N(1); // N Flag always set.
+    // H Flag set if no borrow from bit 4.
+    // TODO: Verify this comparison
+    if ((z80->a ^ (n & 0xFF) ^ op_aux) & 0x10) {
+        set_H(1);
+    }
+    set_C(n < 0); // Set if no borrow [A < n]
+    z80->a -= op_aux;
+    print_debug("SUB d8, $%X (A: $%X)\n", op_aux, z80->a);
+    z80->t = 8;
     break;
 
     // Put A into memory address $FF00+n.
@@ -765,6 +815,7 @@ case 0xEF: // RST 28H
     z80->pc = 0x28;
     z80->t = 16;
     print_debug("RST 28HA\n");
+    break;
 
     // Put memory address $FF00+n into A.
 case 0xF0: // LDH A, (n)
@@ -811,6 +862,8 @@ case 0xFB: // EI
 case 0xFE: // CP, n
     /*
      * Compare A with n.
+     * This is basically an A - n subtraction (0xD6) instruction but the
+     * results are thrown away.
      */
     op_aux = read_byte(mmu, z80->pc++);
     n = z80->a - op_aux;
