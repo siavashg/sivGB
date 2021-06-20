@@ -155,19 +155,15 @@ case 0x11: // LD DE,nn
     z80->e = read_byte(mmu, z80->pc++);
     z80->d = read_byte(mmu, z80->pc++);
     z80->t = 12;
-    print_debug("LD DE, $%X%X\n", z80->e, z80->d);
+    print_debug("LD DE, $%.2X%.2X\n", z80->d, z80->e);
     break;
 
-case 0x12: // LD DE,A
-    z80->e = read_byte(mmu, z80->a);
-    z80->d = read_byte(mmu, z80->a + 1);
-    /* TODO: Potentially more optimized as:
-        op_aux = read_word(mmu, z80->a);
-        z80->e = op_aux & 0xFF;
-        z80->d = (op_aux >> 8) & 0xFF;
-    */
+case 0x12: // LD (DE), A
+    op_aux = D16(z80->d, z80->e);
+    write_byte(mmu, op_aux, z80->a);
     z80->t = 8;
-    print_debug("LD DE, A [DE: 0x%.2X%.2X]\n", z80->d, z80->e);
+    print_debug("LD (DE), A [DE: 0x%.2X%.2X, A: 0x%.2X]\n", z80->d, z80->e,
+        z80->a);
     break;
 
 case 0x13: // INC DE
