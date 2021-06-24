@@ -10,7 +10,7 @@ int reset_mmu(MMU *mmu) {
     mmu->io[0x05] = 0x00;   // TIMA
     mmu->io[0x06] = 0x00;   // TMA
     mmu->io[0x07] = 0x00;   // TAC
-    //mmu->io[0x0F] = 0x01; // IF
+    mmu->io[0x0F] = 0x01;   // IF
     mmu->io[0x10] = 0x80;   // NR10
     mmu->io[0x11] = 0xBF;   // NR11
     mmu->io[0x12] = 0xF3;   // NR12
@@ -33,13 +33,13 @@ int reset_mmu(MMU *mmu) {
     mmu->io[0x41] = 0x84;   // STAT
     mmu->io[0x42] = 0x00;   // SCY
     mmu->io[0x43] = 0x00;   // SCX
-    mmu->io[0x44] = 0x00;   // LY
+    //mmu->io[0x44] = 0x00;   // LY
     mmu->io[0x45] = 0x00;   // LYC
     mmu->io[0x47] = 0xFC;   // BGP
     mmu->io[0x48] = 0xFF;   // OBP0
     mmu->io[0x49] = 0xFF;   // OBP1
     mmu->io[0x4A] = 0x00;   // WY
-    mmu->io[0x4B]= 0;       // WX
+    mmu->io[0x4B] = 0x00;   // WX
     mmu->ie=0;              // IE
     return 0;
 }
@@ -203,6 +203,7 @@ uint8_t write_byte(MMU *mmu, uint16_t address, uint8_t byte) {
 
         // OAM
         case 0xE00:
+            print_debug("XXX MMU WRITE XXX");
             mmu->OAM[address&0x00FF] = byte;
             return 0;
 
