@@ -19,7 +19,7 @@ int reset_z80(Z80 *z80) {
     z80->a = 0x01;
     z80->f = 0xB0;
     z80->b = 0x00;
-    z80->c = 0x0D;
+    z80->c = 0x13;
     z80->d = 0x00;
     z80->e = 0xD8;
     z80->h = 0x01;
@@ -49,6 +49,11 @@ void debug_dump(Z80 *z80) {
             "H: 0x%.2X\t"
             "L: 0x%.2X\t\n"
 
+            "AF: %.2X%.2X\n"
+            "BC: %.2X%.2X\n"
+            "DE: %.2X%.2X\n"
+            "HL: %.2X%.2X\n"
+
             "IME: 0x%.2X\t"
             "M: 0x%.2X\t"
             "T: 0x%.2X\t"
@@ -58,6 +63,10 @@ void debug_dump(Z80 *z80) {
             z80->pc, z80->sp,
             z80->a, z80->b, z80->c, z80->d,
             z80->e, z80->f, z80->h, z80->l,
+            z80->a, z80->f,
+            z80->b, z80->c,
+            z80->d, z80->e,
+            z80->h, z80->l,
             z80->ime, z80->m, z80->t,
             z80->halt, z80->stop);
     }
