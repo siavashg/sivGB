@@ -773,19 +773,16 @@ case 0xD5: // PUSH DE
     break;
 
 case 0xD6: // SUB d8
-    op_aux = read_byte(mmu, z80->pc);
-    n = z80->a - op_aux;
-    set_Z(!n); // Set if result is zero
+    n = read_byte(mmu, z80->pc++);
     set_N(1); // N Flag always set.
+    set_C(n > z80->a); // Set if no borrow [A < n]
     // H Flag set if no borrow from bit 4.
     // TODO: Verify this comparison
-    if ((z80->a ^ (n & 0xFF) ^ op_aux) & 0x10) {
-        set_H(1);
-    }
-    set_C(n < 0); // Set if no borrow [A < n]
-    z80->a -= op_aux;
-    print_debug("SUB d8, $%X (A: $%X)\n", op_aux, z80->a);
+    set_H((n & 0x0F) > (z80->a & 0x0F));
+    z80->a -= n;
+    set_Z(z80->a == 0);
     z80->t = 8;
+    print_debug("SUB d8, %X (A: %d)\n", n, z80->a);
     break;
 
     // Put A into memory address $FF00+n.
