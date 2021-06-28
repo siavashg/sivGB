@@ -84,14 +84,24 @@
 
 
 #define RES(bit, byte)\
-        byte &= ~(0x1 << bit);
+        byte &= ~(0x1 << bit); \
+        z80->t = 8;
 
 #define SWAP(byte)\
         byte = (byte >> 4 | byte << 4); \
         set_Z(!byte); \
         set_N(0); \
         set_H(0); \
-        set_C(0);
+        set_C(0); \
+        z80->t = 8;
+
+#define SRL(byte)\
+        set_C(byte & 0x01); \
+        byte = byte >> 1; \
+        set_Z(byte == 0); \
+        set_N(0); \
+        set_H(0); \
+        z80->t = 8;
 
 
 case 0x00: // NOP
@@ -783,8 +793,13 @@ case 0xCB: // CB op codes
         break;
 
     case 0x37: // SWAP A
-        SWAP(z80->a)
-            print_debug("SWAP A ($%X)\n", z80->a);
+        SWAP(z80->a);
+        print_debug("SWAP A ($%X)\n", z80->a);
+        break;
+
+    case 0x38: // SRL B
+        SRL(z80->b);
+        print_debug("SRL B [B: %X]\n", z80->b);
         break;
 
     default:
