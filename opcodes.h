@@ -614,6 +614,13 @@ case 0xA9: // XOR C
     print_debug("XOR C ($%X -> $%X)\n", n, z80->c);
     break;
 
+case 0xAE: // XOR (HL)
+    op_aux = D16(z80->h, z80->l);
+    n = read_byte(mmu, op_aux);
+    XOR(n);
+    z80->t = 8;
+    print_debug("XOR (HL) [HL: %X, (HL): %X]\n", op_aux, n);
+
 case 0xAF: // XOR A
     n = z80->a; // DEBUG
     XOR(z80->a);
