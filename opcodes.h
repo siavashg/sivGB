@@ -635,6 +635,19 @@ case 0xB6: // OR (HL)
     print_debug("OR (HL) ($%X: %X)\n", op_aux, z80->a);
     break;
 
+case 0xC0: // RET NZ
+    // Return if Z flag is reset
+    if (!get_Z) {
+        z80->pc = read_word(mmu, z80->sp);
+        z80->sp += 2;
+        z80->t = 20;
+    }
+    else {
+        z80->t = 8;
+    }
+    print_debug("RET NZ [Z: %X, PC: 0x%.4X]\n", get_Z, z80->pc);
+    break;
+
 case 0xC1: // POP BC
     z80->b = read_byte(mmu, z80->sp++);
     z80->c = read_byte(mmu, z80->sp++);
