@@ -225,6 +225,14 @@ case 0x19: // ADD HL,DE
     print_debug("ADD HL, DE 0x%.4X\n", D16(z80->h, z80->l));
     break;
 
+case 0x1A: // LD A, (DE)
+    op_aux = D16(z80->d, z80->e);
+    z80->a = read_byte(mmu, op_aux);
+    z80->t = 8;
+    print_debug("LD A, (DE) [A: $%.2X, DE %.4X]\n",
+        z80->a, op_aux);
+    break;
+
 case 0x1C: // INC E
     INC(z80->e);
     print_debug("INC E (%X)\n", z80->e);
