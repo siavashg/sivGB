@@ -247,7 +247,7 @@ case 0x20: // JR NZ, n
     else {
         z80->t = 8;
     }
-    print_debug("JR NZ (%X), 0x%.2X\n", !(z80->f & Z_FLAG), n);
+    print_debug("JR NZ [n: %d]\n", n);
     break;
 
 case 0x21: // LD HL,nn
@@ -696,7 +696,7 @@ case 0xC9: // RET
     z80->pc = read_word(mmu, z80->sp);
     z80->sp += 2;
     z80->t = 8;
-    print_debug("RET (PC: %X -> %X)\n", z80->sp, op_aux);
+    print_debug("RET (PC: %X -> %X)\n", op_aux, z80->pc);
     break;
 
 case 0xCB: // CB op codes
@@ -768,8 +768,8 @@ case 0xD5: // PUSH DE
     write_byte(mmu, z80->sp, z80->d);
     z80->sp--;
     write_byte(mmu, z80->sp, z80->e);
-    print_debug("PUSH DE\n");
     z80->t = 16;
+    print_debug("PUSH DE\n");
     break;
 
 case 0xD6: // SUB d8
