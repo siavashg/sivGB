@@ -113,6 +113,14 @@ case 0x01: // LD BC,nn
     print_debug("LD BC, $%X%X\n", z80->b, z80->c);
     break;
 
+case 0x03: // INC BC
+    w = (z80->b << 8) + z80->c; // DEBUG
+    INC16(z80->b, z80->c);
+    z80->t = 8;
+    print_debug("INC BC [0x%.4X -> 0x%.2X%.2X]\n",
+        w, z80->b, z80->c);
+    break;
+
 case 0x04: // INC B
     INC(z80->b);
     print_debug("INC B (%X)\n", z80->b);
