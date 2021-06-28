@@ -658,6 +658,15 @@ case 0xB6: // OR (HL)
     print_debug("OR (HL) ($%X: %X)\n", op_aux, z80->a);
     break;
 
+case 0xB7: // OR A
+    set_Z(!z80->a);
+    set_N(0);
+    set_H(0);
+    set_C(0);
+    z80->t = 4;
+    print_debug("OR A [A: %X]\n", z80->a);
+    break;
+
 case 0xC0: // RET NZ
     // Return if Z flag is reset
     if (!get_Z) {
