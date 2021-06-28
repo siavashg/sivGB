@@ -678,6 +678,22 @@ case 0xC3: // JP nn
     print_debug("JP 0x%.4X\n", op_aux);
     break;
 
+case 0xC4: // CALL nn
+    op_aux = read_word(mmu, z80->pc);
+    z80->pc += 2;
+
+    if (!get_Z) {
+        // Push address of next instruction onto stack
+        z80->sp -= 2;
+        write_word(mmu, z80->sp, z80->pc);
+        // Jump to nn (op_aux)
+        z80->pc = op_aux;
+    }
+
+    z80->t = 16;
+    print_debug("CALL NZ $%X [Z: %X]\n", op_aux, get_Z);
+    break;
+
 case 0xC5: // PUSH BC
     z80->sp--;
     write_byte(mmu, z80->sp, z80->b);
@@ -856,9 +872,7 @@ case 0xEA: // LD (nn), A
     z80->pc += 2;
     write_byte(mmu, op_aux, z80->a);
     z80->t = 16;
-    print_debug("LD (nn), A "
-        "[nn: $%.4X] "
-        "[A %.2X]\n", op_aux, z80->a);
+    print_debug("LD (nn), A [nn: $%.4X, A %.2X]\n", op_aux, z80->a);
     break;
 
     // TODO: Untested
