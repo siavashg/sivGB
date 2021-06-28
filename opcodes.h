@@ -84,7 +84,7 @@
 
 
 #define RES(bit, byte)\
-        byte &= ~(0x1 << bit)
+        byte &= ~(0x1 << bit);
 
 #define SWAP(byte)\
         byte = (byte >> 4 | byte << 4); \
@@ -110,7 +110,7 @@ case 0x01: // LD BC,nn
     z80->c = read_byte(mmu, z80->pc++);
     z80->b = read_byte(mmu, z80->pc++);
     z80->t = 12;
-    print_debug("LD BC, $%X%X\n", z80->c, z80->b);
+    print_debug("LD BC, $%X%X\n", z80->b, z80->c);
     break;
 
 case 0x04: // INC B
