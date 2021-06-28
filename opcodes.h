@@ -845,8 +845,8 @@ case 0xE9: // JP (HL)
 
     // Put A into memory address nn
 case 0xEA: // LD (nn), A
-    op_aux = read_word(mmu, z80->pc++);
-    z80->pc++;
+    op_aux = read_word(mmu, z80->pc);
+    z80->pc += 2;
     write_byte(mmu, op_aux, z80->a);
     z80->t = 16;
     print_debug("LD (nn), A "
@@ -892,6 +892,14 @@ case 0xF5: // PUSH AF
     write_byte(mmu, z80->sp, z80->f);
     print_debug("PUSH AF\n");
     z80->t = 16;
+    break;
+
+case 0xFA: // LD A, (nn)
+    op_aux = read_word(mmu, z80->pc);
+    z80->pc += 2;
+    z80->a = read_byte(mmu, op_aux);
+    z80->t = 16;
+    print_debug("LD A, (nn) [A: $%.2X, nn %.4X]\n", z80->a, op_aux);
     break;
 
 case 0xFB: // EI
