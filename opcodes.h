@@ -228,13 +228,13 @@ case 0x1D: // DEC E
     break;
 
 case 0x1F: // RRA
-    n = C_FLAG;
-    set_C(z80->a & 1);
-    z80->a = (z80->a >> 1) | (n << 7);
-    z80->t = 4;
-    // TODO: Unsure if this is correct
-    //Z_FLAG = (z80->a == 0);
-    print_debug("RRA [A: 0x%.2X]\n", z80->a);
+    n = z80->a & 0xFF;
+    z80->a = z80->a >> 1 | (get_C << 7);
+    set_Z(0);
+    set_N(0);
+    set_H(0);
+    set_C(n & 0x01);
+    print_debug("RRA [A: 0x%.2X -> 0x%.2X]\n", n & 0xFF, z80->a);
     break;
 
 case 0x20: // JR NZ, n
