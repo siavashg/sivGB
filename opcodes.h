@@ -302,6 +302,12 @@ case 0x25: // DEC H
     print_debug("DEC H (%X)\n", z80->h);
     break;
 
+case 0x26: // LD H,n
+    z80->h = read_byte(mmu, z80->pc++);
+    z80->t = 8;
+    print_debug("LD H, 0x%.2X\n", z80->a);
+    break;
+
 case 0x2A: // LDI A, HL
     n = z80->a; // DEBUG
     op_aux = D16(z80->h, z80->l);
