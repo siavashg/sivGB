@@ -502,6 +502,13 @@ case 0x76: // HALT
     //debug_step = true;
     break;
 
+case 0x77: // LD (HL), A
+    op_aux = D16(z80->h, z80->l);
+    write_byte(mmu, op_aux, z80->a);
+    z80->t = 8;
+    print_debug("LD (HL), A [HL: 0x%.4X, A: 0x%.2X]\n", op_aux, z80->a);
+    break;
+
 case 0x78: // LD A,B
     z80->a = z80->b;
     z80->t = 4;
