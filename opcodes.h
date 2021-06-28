@@ -649,8 +649,8 @@ case 0xC0: // RET NZ
     break;
 
 case 0xC1: // POP BC
-    z80->b = read_byte(mmu, z80->sp++);
     z80->c = read_byte(mmu, z80->sp++);
+    z80->b = read_byte(mmu, z80->sp++);
     print_debug("POP BC [BC: 0x%.4X]\n", D16(z80->b, z80->c));
     z80->t = 12;
     break;
@@ -743,10 +743,10 @@ case 0xD0: // RET NC
     break;
 
 case 0xD1: // POP DE
-    z80->d = read_byte(mmu, z80->sp++);
     z80->e = read_byte(mmu, z80->sp++);
-    print_debug("POP DE [DE: 0x%.4X]\n", D16(z80->d, z80->e));
+    z80->d = read_byte(mmu, z80->sp++);
     z80->t = 12;
+    print_debug("POP DE [DE: 0x%.4X]\n", D16(z80->d, z80->e));
     break;
 
 case 0xD5: // PUSH DE
@@ -783,8 +783,8 @@ case 0xE0: // LDH (n), A
     break;
 
 case 0xE1: // POP HL
-    z80->h = read_byte(mmu, z80->sp++);
     z80->l = read_byte(mmu, z80->sp++);
+    z80->h = read_byte(mmu, z80->sp++);
     print_debug("POP HL [HL: 0x%.4X]\n", D16(z80->h, z80->l));
     z80->t = 12;
     break;
@@ -854,8 +854,8 @@ case 0xF0: // LDH A, (n)
     break;
 
 case 0xF1: // POP AF
-    z80->a = read_byte(mmu, z80->sp++);
     z80->f = read_byte(mmu, z80->sp++);
+    z80->a = read_byte(mmu, z80->sp++);
     print_debug("POP AF\n");
     z80->t = 12;
     break;
