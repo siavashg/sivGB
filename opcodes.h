@@ -677,6 +677,19 @@ case 0xC6: // ADD A,n
     ADD(z80->a, n);
     break;
 
+case 0xC8: // RET Z
+    // Return if Z flag is set
+    if (get_Z) {
+        z80->pc = read_word(mmu, z80->sp);
+        z80->sp += 2;
+        z80->t = 20;
+    }
+    else {
+        z80->t = 8;
+    }
+    print_debug("RET Z [Z: %X, PC: 0x%.4X]\n", get_Z, z80->pc);
+    break;
+
 case 0xC9: // RET
     // Get address of previous instruction from stack
     op_aux = z80->pc; // DEBUG
