@@ -410,10 +410,24 @@ case 0x3E: // LD A,n
     print_debug("LD A, 0x%.2X\n", z80->a);
     break;
 
+case 0x46: // LD B, (HL)
+    op_aux = D16(z80->h, z80->l);
+    z80->b = read_byte(mmu, op_aux);
+    z80->t = 8;
+    print_debug("LD (HL), B ($%X)\n", z80->b);
+    break;
+
 case 0x47: // LD B,A
     z80->b = z80->a;
     z80->t = 4;
     print_debug("LD B, A ($%X)\n", z80->b);
+    break;
+
+case 0x4E: // LD C, (HL)
+    op_aux = D16(z80->h, z80->l);
+    z80->c = read_byte(mmu, op_aux);
+    z80->t = 8;
+    print_debug("LD (HL), B ($%X)\n", z80->c);
     break;
 
 case 0x4F: // LD C,A
