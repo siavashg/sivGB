@@ -8,6 +8,21 @@
 #define set_N(x) z80->f = ((z80->f & (0xFF - N_FLAG)) | ((x)<<6))
 #define set_H(x) z80->f = ((z80->f & (0xFF - H_FLAG)) | ((x)<<5))
 #define set_C(x) z80->f = ((z80->f & (0xFF - C_FLAG)) | ((x)<<4))
+#define get_Z !!(z80->f & Z_FLAG)
+#define get_N !!(z80->f & N_FLAG)
+#define get_H !!(z80->f & H_FLAG)
+#define get_C !!(z80->f & C_FLAG)
+
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0')
 
 #define INC(reg) \
         set_H((reg & 0x0F) == 0x0F); \
