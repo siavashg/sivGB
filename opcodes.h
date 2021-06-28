@@ -733,13 +733,14 @@ case 0xCD: // CALL nn
     break;
 
 case 0xCE: // ADC A,n
-    n = z80->a;
-    z80->a = z80->a + read_byte(mmu, z80->pc) + C_FLAG;
-    set_Z(!z80->a);
+    n = read_byte(mmu, z80->pc++);
+    op_aux = z80->a + n + get_C;
+    set_Z((op_aux & 0xFF) == 0);
     set_N(0);
-    set_C(z80->a < n);
+    set_H((z80->a ^ n ^ op_aux) & 0x10 ? 1 : 0);
+    set_C((op_aux & 0xFF00) ? 1 : 0);
+    z80->a = op_aux & 0xFF;
     print_debug("ADC A,%.2x [A: 0x%.2x]\n", z80->pc, z80->a);
-    z80->pc += 2;
     break;
 
 case 0xD0: // RET NC
