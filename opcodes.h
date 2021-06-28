@@ -240,7 +240,7 @@ case 0x1F: // RRA
 case 0x20: // JR NZ, n
     // Jump to n if Z flag is reset
     n = read_byte(mmu, z80->pc++);
-    if (!(z80->f & Z_FLAG)) {
+    if (!get_Z) {
         z80->pc += n;
         z80->t = 12;
     }
@@ -309,7 +309,7 @@ case 0x2B: // DEC HL
 case 0x28: // JR Z, n
     // Jump to n if Z flag is set
     n = read_byte(mmu, z80->pc++);
-    if (z80->f & Z_FLAG) {
+    if (get_Z) {
         z80->pc += n;
         z80->t = 12;
     }
@@ -341,14 +341,14 @@ case 0x2F: // CPL
 case 0x30: // JR NC, n
     // Jump to n if C flag is reset
     n = read_byte(mmu, z80->pc++);
-    if (!(z80->f & C_FLAG)) {
+    if (!get_C) {
         z80->pc += n;
         z80->t = 12;
     }
     else {
         z80->t = 8;
     }
-    print_debug("JR NC (%X), 0x%.2X\n", !(z80->f & C_FLAG), n);
+    print_debug("JR NC [C: %X, n: %d, pc: %X]\n", get_C, n, z80->pc);
     break;
 
 
@@ -718,7 +718,7 @@ case 0xCE: // ADC A,n
 
 case 0xD0: // RET NC
     // Return if carry flag is reset
-    if (!(z80->f & C_FLAG)) {
+    if (!get_C) {
         z80->pc = read_word(mmu, z80->sp);
         z80->sp += 2;
         z80->t = 20;
@@ -726,7 +726,7 @@ case 0xD0: // RET NC
     else {
         z80->t = 8;
     }
-    print_debug("RET NC (%X)\n", !(z80->f & C_FLAG));
+    print_debug("RET NC (%X)\n", !get_C);
     break;
 
 case 0xD1: // POP DE
