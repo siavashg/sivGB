@@ -103,6 +103,16 @@
         set_H(0); \
         z80->t = 8;
 
+#define RR(byte)\
+        n = byte; \
+        byte = (byte >> 1); \
+        if (get_C) byte |= 0x80; \
+        set_Z(byte == 0); \
+        set_N(0); \
+        set_H(0); \
+        set_C(byte & 0x01); \
+        z80->t = 8;
+
 
 case 0x00: // NOP
 case 0x40: // LD B,B
@@ -790,6 +800,41 @@ case 0xCB: // CB op codes
     case 0xBF: // RES 7,a
         RES(7, z80->a);
         print_debug("RES 7, a ($%X)\n", z80->a);
+        break;
+
+    case 0x18: // RR B
+        RR(z80->b);
+        print_debug("RR B [b: %x]\n", z80->b);
+        break;
+
+    case 0x19: // RR C
+        RR(z80->c);
+        print_debug("RR C [c: %x]\n", z80->c);
+        break;
+
+    case 0x1A: // RR D
+        RR(z80->d);
+        print_debug("RR D [d: %x]\n", z80->d);
+        break;
+
+    case 0x1B: // RR E
+        RR(z80->e);
+        print_debug("RR E [e: %x]\n", z80->e);
+        break;
+
+    case 0x1C: // RR H
+        RR(z80->h);
+        print_debug("RR H [h: %x]\n", z80->h);
+        break;
+
+    case 0x1D: // RR L
+        RR(z80->l);
+        print_debug("RR L [l: %x]\n", z80->l);
+        break;
+
+    case 0x1F: // RR A
+        RR(z80->a);
+        print_debug("RR A [l: %x]\n", z80->a);
         break;
 
     case 0x37: // SWAP A
