@@ -487,7 +487,7 @@ case 0x57: // LD D,A
 case 0x5F: // LD E,A
     z80->e = z80->a;
     z80->t = 4;
-    print_debug("LD E, A ($%X)\n", z80->e);
+    print_debug("LD E, A [E: %x]\n", z80->e);
     break;
 
 case 0x5E: // LD E, (HL)
@@ -504,6 +504,10 @@ case 0x6E: // LD L, (HL)
     print_debug("LD L, (HL) [l: $%X]\n", z80->l);
     break;
 
+case 0x6F: // LD L, A
+    z80->l = z80->a;
+    z80->t = 4;
+    print_debug("LD L, A [L: %X]\n", z80->l);
     break;
 
 case 0x70: // LD (HL), B
