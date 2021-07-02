@@ -494,7 +494,16 @@ case 0x5E: // LD E, (HL)
     op_aux = D16(z80->h, z80->l);
     z80->e = read_byte(mmu, op_aux);
     z80->t = 8;
-    print_debug("LD (HL), E ($%X)\n", z80->e);
+    print_debug("LD E, (HL) [l: $%X]\n", z80->e);
+    break;
+
+case 0x6E: // LD L, (HL)
+    op_aux = D16(z80->h, z80->l);
+    z80->l = read_byte(mmu, op_aux);
+    z80->t = 8;
+    print_debug("LD L, (HL) [l: $%X]\n", z80->l);
+    break;
+
     break;
 
 case 0x70: // LD (HL), B
