@@ -411,6 +411,15 @@ case 0x32: // LD (HL-),A
         op_aux, D16(z80->h, z80->l), z80->a);
     break;
 
+case 0x35: // DEC (HL)
+    op_aux = D16(z80->h, z80->l);
+    n = read_byte(mmu, op_aux);
+    DEC(n);
+    write_byte(mmu, op_aux, n);
+    z80->t = 12;
+    print_debug("DEC (HL) [HL: %x, (HL): %x]\n", op_aux, n);
+    break;
+
 case 0x36: // LD (HL),n
     op_aux = D16(z80->h, z80->l);
     n = read_byte(mmu, z80->pc++);
