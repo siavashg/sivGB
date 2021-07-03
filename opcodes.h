@@ -48,6 +48,14 @@
         set_Z(!z80->a); \
         z80->t = 4;
 
+#define CP(reg) \
+        set_N(1); \
+        set_H((reg & 0x0F) > (z80->a & 0x0F)); \
+        set_C(reg > z80->a); \
+        z80->a = z80->a - reg; \
+        set_Z(z80->a == reg); \
+        z80->t = 4;
+
 // TODO: Verify H and C flags
 #define ADD(reg, n) \
         reg += n; \
@@ -352,15 +360,12 @@ case 0x29: // ADD HL, HL
     break;
 
 case 0x2A: // LDI A, HL
-    n = z80->a; // DEBUG
     op_aux = D16(z80->h, z80->l);
     z80->a = read_byte(mmu, op_aux);
     INC16(z80->h, z80->l);
-    w = D16(z80->h, z80->l); // DEBUG
     z80->t = 8;
-    print_debug("LDI A, HL"
-        "[HL: 0x%.4X -> 0x%.4X]"
-        "[A: 0x%.2X -> 0x%.2X]\n", op_aux, w, n, z80->a);
+    print_debug("LDI A, HL [HL: 0x%.4X A: 0x%.2X]\n",
+        D16(z80->h, z80->l), z80->a);
     break;
 
 case 0x2B: // DEC HL
@@ -879,6 +884,49 @@ case 0xB7: // OR A
     print_debug("OR A [A: %X]\n", z80->a);
     break;
 
+case 0xB8: // CP B
+    CP(z80->b);
+    print_debug("CP B [A: %X, B: %X]\n", z80->a, z80->b);
+    break;
+
+case 0xB9: // CP C
+    CP(z80->c);
+    print_debug("CP C [A: %X, C: %X]\n", z80->a, z80->c);
+    break;
+
+case 0xBA: // CP D
+    CP(z80->d);
+    print_debug("CP D [A: %X, D: %X]\n", z80->a, z80->d);
+    break;
+
+case 0xBB: // CP E
+    CP(z80->e);
+    print_debug("CP E [A: %X, E: %X]\n", z80->a, z80->e);
+    break;
+
+case 0xBC: // CP H
+    CP(z80->h);
+    print_debug("CP H [A: %X, H: %X]\n", z80->a, z80->h);
+    break;
+
+case 0xBD: // CP L
+    CP(z80->l);
+    print_debug("CP L [A: %X, L: %X]\n", z80->a, z80->l);
+    break;
+
+case 0xBE: // CP (HL)
+    n = read_byte(mmu, D16(z80->h, z80->l));
+    CP(n);
+    z80->t = 8;
+    print_debug("CP HL [A: %X, HL: %X, (HL): %X]\n",
+        z80->a, D16(z80->h, z80->l), n);
+    break;
+
+case 0xBF: // CP A
+    CP(z80->a);
+    print_debug("CP A [A: %X]\n", z80->a);
+    break;
+
 case 0xC0: // RET NZ
     // Return if Z flag is reset
     if (!get_Z) {
@@ -1251,18 +1299,8 @@ case 0xFE: // CP, n
      * This is basically an A - n subtraction (0xD6) instruction but the
      * results are thrown away.
      */
-    op_aux = read_byte(mmu, z80->pc++);
-    n = z80->a - op_aux;
-
-    set_Z(!n);  // Z Flag set if result is zero [A = n]
-    set_N(1);  // N Flag always set
-    set_C(n < 0);  // C Flag set for no borrow [A < n]
-
-    // H Flag set if no borrow from bit 4.
-    // TODO: Verify this comparison
-    if ((z80->a ^ (n & 0xFF) ^ op_aux) & 0x10) {
-        set_H(1);
-    }
-    print_debug("CP, $%X (A: $%X) (F: $%X)\n", op_aux, z80->a, z80->f);
-    z80->t = 4;
+    n = read_byte(mmu, z80->pc++);
+    CP(n);
+    z80->t = 8;
+    print_debug("CP, n [A: %X, n: %X]\n", z80->a, n);
     break;
