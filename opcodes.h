@@ -1194,6 +1194,17 @@ case 0xE6: // AND n
     print_debug("AND 0x%.2X [A: 0x%.2X]\n", n, z80->a);
     break;
 
+case 0xE8: // ADD SP, n
+    n = read_byte(mmu, z80->pc++);
+    op_aux = z80->sp + n;
+    set_Z(0);
+    set_N(0);
+    set_H((z80->sp & 0x0F) + (n & 0x0F) > 0x0F);
+    set_C(op_aux & 0xFFFF0000);
+    z80->sp = op_aux & 0xFFFF;
+    z80->t = 16;
+    break;
+
 case 0xE9: // JP (HL)
     // No need to increment z80->pc since jump
     z80->pc = D16(z80->h, z80->l);
