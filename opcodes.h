@@ -783,6 +783,18 @@ case 0xC1: // POP BC
     z80->t = 12;
     break;
 
+case 0xC2: // JP NZ, nn
+    // Return if Z flag is reset
+    if (!get_Z) {
+        z80->pc = read_word(mmu, z80->pc);
+        z80->t = 16;
+    }
+    else {
+        z80->t = 12;
+    }
+    print_debug("JP NZ, nn [Z: %X, PC: 0x%.4X]\n", get_Z, z80->pc);
+    break;
+
 case 0xC3: // JP nn
     // No need to increment z80->pc since jump
     op_aux = read_word(mmu, z80->pc);
