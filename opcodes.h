@@ -263,6 +263,12 @@ case 0x1D: // DEC E
     print_debug("DEC E (%X)\n", z80->e);
     break;
 
+case 0x1E: // LD E, n
+    z80->e = read_byte(mmu, z80->pc++);
+    z80->t = 8;
+    print_debug("LD E, 0x%.2X\n", z80->e);
+    break;
+
 case 0x1F: // RRA
     n = z80->a & 0xFF;
     z80->a = z80->a >> 1 | (get_C << 7);
@@ -378,6 +384,12 @@ case 0x2C: // INC L
 case 0x2D: // DEC L
     DEC(z80->l);
     print_debug("DEC L (%X)\n", z80->l);
+    break;
+
+case 0x2E: // LD L, n
+    z80->l = read_byte(mmu, z80->pc++);
+    z80->t = 8;
+    print_debug("LD L, 0x%.2X\n", z80->l);
     break;
 
 case 0x2F: // CPL
