@@ -722,6 +722,13 @@ case 0x7D: // LD A,L
     print_debug("LD A, L ($%X)\n", z80->a);
     break;
 
+case 0x7E: // LD A, (HL)
+    n = read_byte(mmu, D16(z80->h, z80->l));
+    z80->a = n;
+    print_debug("LD A, HL [A: %X, HL: %X, (HL): %X]\n",
+        z80->a, D16(z80->h, z80->l), n);
+    break;
+
 case 0x80: // ADD A,B
     ADD(z80->a, z80->b);
     print_debug("ADD A, B ($%X)\n", z80->a);
