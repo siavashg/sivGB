@@ -526,11 +526,84 @@ case 0x5E: // LD E, (HL)
     print_debug("LD E, (HL) [l: $%X]\n", z80->e);
     break;
 
+case 0x60: // LD H, B
+    z80->h = z80->b;
+    z80->t = 4;
+    print_debug("LD H, B [H: %.2x]\n", z80->h);
+    break;
+
+case 0x61: // LD H, C
+    z80->h = z80->c;
+    z80->t = 4;
+    print_debug("LD H, C [H: %.2x]\n", z80->h);
+    break;
+
+case 0x62: // LD H, D
+    z80->h = z80->d;
+    z80->t = 4;
+    print_debug("LD H, D [H: %.2x]\n", z80->h);
+    break;
+
+case 0x63: // LD H, E
+    z80->h = z80->e;
+    z80->t = 4;
+    print_debug("LD H, E [H: %.2x]\n", z80->h);
+    break;
+
+case 0x65: // LD H, L
+    z80->h = z80->l;
+    z80->t = 4;
+    print_debug("LD H, L [H: %.2x]\n", z80->h);
+    break;
+
+case 0x66: // LD H, (HL)
+    op_aux = D16(z80->h, z80->l);
+    z80->h = read_byte(mmu, op_aux);
+    z80->t = 8;
+    print_debug("LD H, (HL) [H: $%X]\n", z80->h);
+    break;
+
+case 0x67: // LD H, A
+    z80->h = z80->a;
+    z80->t = 4;
+    print_debug("LD H, A [H: %.2x]\n", z80->h);
+    break;
+
+case 0x68: // LD L, B
+    z80->l = z80->b;
+    z80->t = 4;
+    print_debug("LD L, B [L: %.2x]\n", z80->l);
+    break;
+
+case 0x69: // LD L, C
+    z80->l = z80->c;
+    z80->t = 4;
+    print_debug("LD L, C [L: %.2x]\n", z80->l);
+    break;
+
+case 0x6A: // LD L, D
+    z80->l = z80->d;
+    z80->t = 4;
+    print_debug("LD L, D [L: %.2x]\n", z80->l);
+    break;
+
+case 0x6B: // LD L, E
+    z80->l = z80->e;
+    z80->t = 4;
+    print_debug("LD L, E [L: %.2x]\n", z80->l);
+    break;
+
+case 0x6C: // LD L, H
+    z80->l = z80->h;
+    z80->t = 4;
+    print_debug("LD L, H [L: %.2x]\n", z80->l);
+    break;
+
 case 0x6E: // LD L, (HL)
     op_aux = D16(z80->h, z80->l);
     z80->l = read_byte(mmu, op_aux);
     z80->t = 8;
-    print_debug("LD L, (HL) [l: $%X]\n", z80->l);
+    print_debug("LD L, (HL) [L: $%X]\n", z80->l);
     break;
 
 case 0x6F: // LD L, A
@@ -1139,6 +1212,18 @@ case 0xF6: // OR n
     print_debug("OR 0x%.2X [A: 0x%.2X]\n", n, z80->a);
     break;
 
+case 0xF8: // LD HL, SP+n
+    n = read_byte(mmu, z80->pc++);
+    op_aux = z80->sp + n;
+    set_C(op_aux & 0xFFFF0000);
+    set_H((z80->sp & 0x0F) + (n & 0x0F) > 0x0F);
+    set_Z(0);
+    set_N(0);
+    z80->h = op_aux >> 8;
+    z80->l = op_aux & 0xFF;
+    z80->t = 12;
+    print_debug("LD HL, SP+n [HL: 0x%.4X, SP: 0x%.2X, n: 0x%.2X]\n", D16(z80->h, z80->l), z80->sp, n);
+    break;
 
 case 0xFA: // LD A, (nn)
     op_aux = read_word(mmu, z80->pc);
