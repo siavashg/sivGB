@@ -1061,6 +1061,18 @@ case 0xF5: // PUSH AF
     z80->t = 16;
     break;
 
+case 0xF6: // OR n
+    n = read_byte(mmu, z80->pc++);
+    z80->a |= n;
+    set_Z(!z80->a);
+    set_N(0);
+    set_H(0);
+    set_C(0);
+    z80->t = 8;
+    print_debug("OR 0x%.2X [A: 0x%.2X]\n", n, z80->a);
+    break;
+
+
 case 0xFA: // LD A, (nn)
     op_aux = read_word(mmu, z80->pc);
     z80->pc += 2;
