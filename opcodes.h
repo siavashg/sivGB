@@ -325,7 +325,17 @@ case 0x25: // DEC H
 case 0x26: // LD H,n
     z80->h = read_byte(mmu, z80->pc++);
     z80->t = 8;
-    print_debug("LD H, 0x%.2X\n", z80->a);
+    print_debug("LD H, 0x%.2X\n", z80->h);
+    break;
+
+case 0x29: // ADD HL, HL
+    op_aux = D16(z80->h, z80->l) + D16(z80->h, z80->l);
+    set_N(0);
+    set_H(op_aux & 0x1000);
+    set_C(op_aux & 0xFFFF0000);
+    z80->h = (op_aux & 0x0000FF00) >> 8;
+    z80->l = (op_aux & 0x000000FF);
+    print_debug("ADD HL, HL [HL: 0x%.4X]\n", D16(z80->h, z80->l));
     break;
 
 case 0x2A: // LDI A, HL
@@ -507,7 +517,7 @@ case 0x6E: // LD L, (HL)
 case 0x6F: // LD L, A
     z80->l = z80->a;
     z80->t = 4;
-    print_debug("LD L, A [L: %X]\n", z80->l);
+    print_debug("LD L, A [L: %.2x]\n", z80->l);
     break;
 
 case 0x70: // LD (HL), B
