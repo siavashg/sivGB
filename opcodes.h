@@ -299,9 +299,8 @@ case 0x22: // LDI HL, A
     INC16(z80->h, z80->l);
     w = D16(z80->h, z80->l); // DEBUG
     z80->t = 8;
-    print_debug("LDI HL, A"
-        "[HL: 0x%.4X -> 0x%.4X]"
-        "[A: 0x%.2X]\n", op_aux, w, z80->a);
+    print_debug("LDI HL, A [HL: 0x%.4X -> 0x%.4X, A: 0x%.2X]\n",
+        op_aux, w, z80->a);
     break;
 
 case 0x23: // INC HL
@@ -607,6 +606,12 @@ case 0x7A: // LD A,D
     print_debug("LD A, D ($%X)\n", z80->a);
     break;
 
+case 0x7B: // LD A,E
+    z80->a = z80->e;
+    z80->t = 4;
+    print_debug("LD A, E ($%X)\n", z80->a);
+    break;
+
 case 0x7C: // LD A,H
     z80->a = z80->h;
     z80->t = 4;
@@ -877,6 +882,11 @@ case 0xCB: // CB op codes
     case 0x38: // SRL B
         SRL(z80->b);
         print_debug("SRL B [B: %X]\n", z80->b);
+        break;
+
+    case 0x3F: // SRL A
+        SRL(z80->a);
+        print_debug("SRL A [A: %X]\n", z80->a);
         break;
 
     default:
