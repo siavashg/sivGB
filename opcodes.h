@@ -40,6 +40,14 @@
         set_N(1); \
         z80->t = 4;
 
+#define SUB(reg) \
+        set_N(1); \
+        set_H((reg & 0x0F) > (z80->a & 0x0F)); \
+        set_C(reg > z80->a); \
+        z80->a = z80->a - reg; \
+        set_Z(!z80->a); \
+        z80->t = 4;
+
 // TODO: Verify H and C flags
 #define ADD(reg, n) \
         reg += n; \
@@ -669,6 +677,41 @@ case 0x85: // ADD A,L
 case 0x87: // ADD A,A
     ADD(z80->a, z80->a);
     print_debug("ADD A, A ($%X)\n", z80->a);
+    break;
+
+case 0x90: // SUB B
+    SUB(z80->b);
+    print_debug("SUB B [A: %x, B: %x]\n", z80->a, z80->b);
+    break;
+
+case 0x91: // SUB C
+    SUB(z80->c);
+    print_debug("SUB C [A: %x, C: %x]\n", z80->a, z80->c);
+    break;
+
+case 0x92: // SUB D
+    SUB(z80->d);
+    print_debug("SUB D [A: %x, D: %x]\n", z80->a, z80->c);
+    break;
+
+case 0x93: // SUB E
+    SUB(z80->e);
+    print_debug("SUB E [A: %x, E: %x]\n", z80->a, z80->e);
+    break;
+
+case 0x94: // SUB H
+    SUB(z80->h);
+    print_debug("SUB H [A: %x, H: %x]\n", z80->a, z80->h);
+    break;
+
+case 0x95: // SUB L
+    SUB(z80->l);
+    print_debug("SUB L [A: %x, L: %x]\n", z80->a, z80->l);
+    break;
+
+case 0x97: // SUB A
+    SUB(z80->a);
+    print_debug("SUB A [A: %x, A: %x]\n", z80->a, z80->a);
     break;
 
 case 0xA1: // AND C
